@@ -1,2 +1,5 @@
 # Env
 .env
+
+#binary
+tmp/main.exe

@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	db "retialops/DB"
 	"retialops/routes"
 
 	"github.com/gin-contrib/sessions"
@@ -17,7 +18,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Error while loading env files")
 	}
-
+	db.DbInit()
 	port := os.Getenv("PORT")
 
 	if port == ""{
@@ -35,6 +36,7 @@ func main() {
 	// load static files
 
 	// load html
+	router.LoadHTMLGlob("templates/*")
 
 	routes.GetUrl(router)
 
