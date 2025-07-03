@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	db "retialops/DB"
+	"retialops/helper"
 	"retialops/routes"
 
 	"github.com/gin-contrib/sessions"
@@ -19,6 +20,7 @@ func main() {
 		log.Fatal("Error while loading env files")
 	}
 	db.DbInit()
+	helper.CreateSuperUser(db.Db)
 	port := os.Getenv("PORT")
 
 	if port == ""{

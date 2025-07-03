@@ -24,7 +24,8 @@ func AuthMiddleware() gin.HandlerFunc{
 			log.Fatal("Error loading env file:", err)
 		}
 
-		Secret := os.Getenv("secret")
+		key := os.Getenv("secret")
+		Secret := []byte(key)
 		token, err := c.Cookie("JWT-User")
 
 		if err != nil{

@@ -21,8 +21,9 @@ func CreateToken(empid string, issuper bool) (string, error) {
 		log.Fatal("Error loading env file:", err)
 	}
 
-	Secret := os.Getenv("secret")
-	
+	key := os.Getenv("secret")
+	Secret := []byte(key)
+
 	claims := Claims{
 		EmpID: empid,
 		IsSuperUser: issuper,

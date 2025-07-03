@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	db "retialops/DB"
 	"retialops/helper"
@@ -52,6 +53,7 @@ func Login(c *gin.Context){
 	token, err := helper.CreateToken(user.EmpID,user.SuperUser)
 
 	if err != nil{
+		fmt.Println(err)
 		c.HTML(http.StatusInternalServerError,"login.html",gin.H{"error":"Failed to create token,please try again later."})
 		return 
 	}

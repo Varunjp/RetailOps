@@ -9,24 +9,24 @@ import (
 type User struct {
 	ID         	uint   		`gorm:"primarykey;autoIncrement"`
 	Username   	string 		`gorm:"not null"`
-	EmpID      	string 		`gorm:"not null;unique; index"`
+	EmpID      	string 		`gorm:"not null;unique;"`
 	Phone      	string
 	Password   	string 		`gorm:"not null"`
 	SuperUser  	bool		`gorm:"default:false"`
 	Created_at 	time.Time
 	Status		string
-	Attendance	[]Attendance	`gorm:"constraint:ONDELETE:CASCADE; foreignKey:EmpID"`
+	Attendance	[]Attendance	`gorm:"constraint:ONDELETE:CASCADE; foreignKey:UserID"`
 }
 
 
 type Attendance	struct{
 	ID			uint 		`gorm:"primaryKey;autoIncrement"`
-	EmpID		uint		`gorm:"index"`
+	UserID		uint		`gorm:"index"`
 	Date		time.Time
 	Status 		string 
 	OTamount	float64	
 	OTStatus	bool 
-	User		User		`gorm:"constraint:ONDELETE:CASCADE; foreignKey:EmpID"`
+	User		User		`gorm:"constraint:ONDELETE:CASCADE; foreignKey:UserID"`
 }
 
 type Product struct{
