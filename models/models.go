@@ -12,7 +12,7 @@ type User struct {
 	EmpID      	string 		`gorm:"not null;unique; index"`
 	Phone      	string
 	Password   	string 		`gorm:"not null"`
-	SuperUser  	bool
+	SuperUser  	bool		`gorm:"default:false"`
 	Created_at 	time.Time
 	Status		string
 	Attendance	[]Attendance	`gorm:"constraint:ONDELETE:CASCADE; foreignKey:EmpID"`
