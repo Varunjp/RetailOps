@@ -15,8 +15,14 @@ import (
 
 func ProductPage(c *gin.Context) {
 	var Products []models.Product
+	var InactiveProducts []models.Product
 
 	if err := db.Db.Preload("ProductDetail").Where("status = ?","Active").Find(&Products).Error; err != nil{
+		c.HTML(http.StatusNotFound,"products.html",gin.H{"error":"Failed to return products or No products added"})
+		return 
+	}
+
+	if err := db.Db.Preload("ProductDetail").Where("status != ?","Active").Find(&InactiveProducts).Error; err != nil{
 		c.HTML(http.StatusNotFound,"products.html",gin.H{"error":"Failed to return products or No products added"})
 		return 
 	}
@@ -29,6 +35,7 @@ func ProductPage(c *gin.Context) {
 	}
 
 	var responseProduct []response
+	var inactiveResponseProduct []response
 
 	for _, product := range Products{
 		rate := product.ProductDetail[0].Rate
@@ -41,6 +48,18 @@ func ProductPage(c *gin.Context) {
 		})
 	}
 
+	for _, product := range InactiveProducts{
+		rate := product.ProductDetail[0].Rate
+		stock := product.ProductDetail[0].Stock
+		inactiveResponseProduct = append(inactiveResponseProduct, response{
+			ID: product.ID,
+			Name: product.ItemName,
+			Rate: rate,
+			Stock: stock,
+		})
+	}
+	
+
 	session := sessions.Default(c)
 	errmsg := session.Get("product")
 
@@ -49,6 +68,7 @@ func ProductPage(c *gin.Context) {
 		session.Save()
 		c.HTML(http.StatusOK,"products.html",gin.H{
 			"products":responseProduct,
+			"inactproducts":inactiveResponseProduct,
 			"error":errmsg,
 		})
 		return
@@ -56,6 +76,7 @@ func ProductPage(c *gin.Context) {
 
 	c.HTML(http.StatusOK,"products.html",gin.H{
 		"products":responseProduct,
+		"inactproducts":inactiveResponseProduct,
 	})
 }
 
@@ -64,12 +85,20 @@ func AddProduct(c *gin.Context){
 	RateStr := c.PostForm("rate")
 	StockStr := c.PostForm("stock")
 	session := sessions.Default(c)
+	var productCheck models.Product
 
 	if strings.TrimSpace(ProductName) == "" || strings.TrimSpace(RateStr) == "" || strings.TrimSpace(StockStr) == ""{
 		session.Set("product","Invalid input passed")
 		session.Save()
 		c.Redirect(http.StatusSeeOther,"/user/products")
 		return 
+	}
+
+	if err := db.Db.Where("item_name ILIKE ?",ProductName).First(&productCheck).Error; err == nil{
+		session.Set("product","Product already exist")
+		session.Save()
+		c.Redirect(http.StatusSeeOther,"/user/products")
+		return
 	}
 
 	rate,_ := strconv.ParseFloat(RateStr,64)
@@ -135,4 +164,77 @@ func EditProductPage(c *gin.Context){
 		"Stock": product.ProductDetail[0].Stock,
 		"Status": product.Status,
 	})
+}
+
+func EditProduct(c *gin.Context){
+	session := sessions.Default(c)
+	productId := c.Param("id")
+	ProductName := c.PostForm("productName")
+	RateStr := c.PostForm("rate")
+	StockStr := c.PostForm("stock")
+	status := c.PostForm("status")
+	var product models.Product
+
+	if strings.TrimSpace(ProductName) == "" || strings.TrimSpace(RateStr) == "" || strings.TrimSpace(StockStr) == ""{
+		session.Set("product","Invalid input passed")
+		session.Save()
+		c.Redirect(http.StatusSeeOther,"/user/products")
+		return 
+	}
+
+	rate,_ := strconv.ParseFloat(RateStr,64)
+	stock,_ := strconv.Atoi(StockStr)
+	var productDetails models.ProductDetail
+
+	if err := db.Db.Preload("ProductDetail").Where("id = ?",productId).First(&product).Error; err != nil{
+		session.Set("product","Could not find product details, please try again later")
+		session.Save()
+		c.Redirect(http.StatusSeeOther,"/user/products")
+		return 
+	}
+
+	if err := db.Db.Where("product_id = ?",product.ID).First(&productDetails).Error; err != nil{
+		session.Set("product","Could not find product details, please try again later")
+		session.Save()
+		c.Redirect(http.StatusSeeOther,"/user/products")
+		return 
+	}
+
+	if rate < 1 {
+		session.Set("product","Product cannot be updated to rate less than zero")
+		session.Save()
+		c.Redirect(http.StatusSeeOther,"/user/products")
+		return 
+	}
+
+	if rate != 0 {
+		productDetails.Rate = rate
+	}
+
+	if stock != 0 {
+		productDetails.Stock+=stock
+	}
+	
+	if ProductName != product.ItemName{
+		product.ItemName = ProductName
+	}
+
+	if status != product.Status{
+		product.Status = status
+	}
+
+	if err := db.Db.Save(&product).Error; err != nil{
+		session.Set("product","Failed to save updates, please try again later")
+		session.Save()
+		c.Redirect(http.StatusSeeOther,"/user/products")
+		return 
+	}
+
+	if err := db.Db.Save(&productDetails).Error; err != nil{
+		session.Set("product","Failed to save updates, please try again later")
+		session.Save()
+		c.Redirect(http.StatusSeeOther,"/user/products")
+		return 
+	}
+	c.Redirect(http.StatusSeeOther,"/user/products")
 }
