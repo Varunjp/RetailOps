@@ -17,4 +17,9 @@ func GetUrl(router *gin.Engine){
 	router.GET("/login",middleware.NoCaches(),controller.LoginPage)
 	router.POST("/user/login",middleware.NoCaches(),controller.Login)
 
+	//Products
+	router.GET("/user/products",middleware.AuthMiddleware(),middleware.NoCaches(),controller.ProductPage)
+	router.POST("/user/add-product",middleware.AuthMiddleware(),middleware.NoCaches(),controller.AddProduct)
+	router.GET("/product/edit/:id",middleware.AuthMiddleware(),middleware.NoCaches(),controller.EditProductPage)
+
 }
