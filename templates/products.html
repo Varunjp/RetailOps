@@ -191,6 +191,37 @@
                             <!-- Add more rows as needed -->
                         </tbody>
                     </table>
+
+                     <!-- Pagination -->
+                    <div class="flex justify-between items-center px-4 py-3 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+                        <div>
+                            <p class="text-sm text-gray-700 dark:text-gray-300">
+                                Page {{.CurrentPage}} of {{.TotalPages}}
+                            </p>
+                        </div>
+                        <div>
+                            <nav class="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                {{if gt .CurrentPage 1}}
+                                    <a href="?page={{dec .CurrentPage}}" class="px-3 py-2 rounded-l-md border border-gray-300 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 hover:bg-gray-50">Previous</a>
+                                {{else}}
+                                    <span class="px-3 py-2 rounded-l-md border border-gray-300 bg-gray-100 dark:bg-gray-700 text-sm font-medium text-gray-400">Previous</span>
+                                {{end}}
+
+                                {{range $i := .Pages}}
+                                    <a href="?page={{$i}}" class="px-3 py-2 border border-gray-300 bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-white hover:bg-gray-50 {{if eq $.CurrentPage $i}}bg-blue-100 dark:bg-blue-600{{end}}">
+                                        {{$i}}
+                                    </a>
+                                {{end}}
+
+                                {{if lt .CurrentPage .TotalPages}}
+                                    <a href="?page={{inc .CurrentPage}}" class="px-3 py-2 rounded-r-md border border-gray-300 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 hover:bg-gray-50">Next</a>
+                                {{else}}
+                                    <span class="px-3 py-2 rounded-r-md border border-gray-300 bg-gray-100 dark:bg-gray-700 text-sm font-medium text-gray-400">Next</span>
+                                {{end}}
+                            </nav>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -260,6 +291,39 @@
                             <!-- Add more rows as needed -->
                         </tbody>
                     </table>
+
+                      <!-- Pagination -->
+                    <div class="flex justify-between items-center px-4 py-3 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+                        <div>
+                            <p class="text-sm text-gray-700 dark:text-gray-300">
+                                Page {{.CurrentPage}} of {{.TotalPages}}
+                            </p>
+                        </div>
+                        <div>
+                            <nav class="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                {{if gt .CurrentPage 1}}
+                                    <a href="?page={{dec .CurrentPage}}" class="px-3 py-2 rounded-l-md border border-gray-300 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 hover:bg-gray-50">Previous</a>
+                                {{else}}
+                                    <span class="px-3 py-2 rounded-l-md border border-gray-300 bg-gray-100 dark:bg-gray-700 text-sm font-medium text-gray-400">Previous</span>
+                                {{end}}
+
+                                {{range $i := .Pages}}
+                                    <a href="?page={{$i}}" class="px-3 py-2 border border-gray-300 bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-white hover:bg-gray-50 {{if eq $.CurrentPage $i}}bg-blue-100 dark:bg-blue-600{{end}}">
+                                        {{$i}}
+                                    </a>
+                                {{end}}
+
+                                {{if lt .CurrentPage .TotalPages}}
+                                    <a href="?page={{inc .CurrentPage}}" class="px-3 py-2 rounded-r-md border border-gray-300 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 hover:bg-gray-50">Next</a>
+                                {{else}}
+                                    <span class="px-3 py-2 rounded-r-md border border-gray-300 bg-gray-100 dark:bg-gray-700 text-sm font-medium text-gray-400">Next</span>
+                                {{end}}
+                            </nav>
+                        </div>
+                    </div>
+
+
+
                 </div>
             </div>
 

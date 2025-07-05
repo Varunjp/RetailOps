@@ -6,6 +6,7 @@ import (
 	db "retialops/DB"
 	"retialops/helper"
 	"retialops/routes"
+	"retialops/utils"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -34,6 +35,7 @@ func main() {
 	router.Use(sessions.Sessions("Mysession",store))
 
 	// add template helper
+	router.SetFuncMap(utils.TemplateFuncs())
 
 	// load static files
 

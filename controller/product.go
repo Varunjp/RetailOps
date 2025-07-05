@@ -1,10 +1,12 @@
 package controller
 
 import (
+	"math"
 	"net/http"
 	db "retialops/DB"
 	"retialops/models"
 	"retialops/utils"
+
 	"strconv"
 	"strings"
 	"time"
@@ -16,13 +18,31 @@ import (
 func ProductPage(c *gin.Context) {
 	var Products []models.Product
 	var InactiveProducts []models.Product
+	
+	pageStr := c.DefaultQuery("page","1")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1{
+		page = 1
+	} 
 
-	if err := db.Db.Preload("ProductDetail").Where("status = ?","Active").Find(&Products).Error; err != nil{
+	const pageSize = 10
+	var total int64
+	db.Db.Model(&models.Product{}).Where("status = ?","Active").Count(&total)
+
+	totalPages := int(math.Ceil(float64(total)/float64(pageSize)))
+
+	if page > totalPages && totalPages != 0 {
+		page = totalPages
+	}
+
+	offset := (page - 1) * pageSize
+
+	if err := db.Db.Preload("ProductDetail").Where("status = ?","Active").Order("id DESC").Limit(pageSize).Offset(offset).Find(&Products).Error; err != nil{
 		c.HTML(http.StatusNotFound,"products.html",gin.H{"error":"Failed to return products or No products added"})
 		return 
 	}
 
-	if err := db.Db.Preload("ProductDetail").Where("status != ?","Active").Find(&InactiveProducts).Error; err != nil{
+	if err := db.Db.Preload("ProductDetail").Where("status != ?","Active").Order("id DESC").Limit(pageSize).Offset(offset).Find(&InactiveProducts).Error; err != nil{
 		c.HTML(http.StatusNotFound,"products.html",gin.H{"error":"Failed to return products or No products added"})
 		return 
 	}
@@ -62,6 +82,19 @@ func ProductPage(c *gin.Context) {
 
 	session := sessions.Default(c)
 	errmsg := session.Get("product")
+	var pages []int 
+	startPage := page - 2
+	if startPage < 1{
+		startPage = 1
+	}
+	endPage := startPage+4
+	if endPage > totalPages{
+		endPage = totalPages
+	}
+
+	for i := startPage; i<= endPage;i++{
+		pages = append(pages, i)
+	}
 
 	if errmsg != nil{
 		session.Delete("product")
@@ -70,6 +103,9 @@ func ProductPage(c *gin.Context) {
 			"products":responseProduct,
 			"inactproducts":inactiveResponseProduct,
 			"error":errmsg,
+			"CurrentPage": page,
+			"TotalPages":totalPages,
+			"Pages": pages,
 		})
 		return
 	}
@@ -77,6 +113,10 @@ func ProductPage(c *gin.Context) {
 	c.HTML(http.StatusOK,"products.html",gin.H{
 		"products":responseProduct,
 		"inactproducts":inactiveResponseProduct,
+		"error":errmsg,
+		"CurrentPage": page,
+		"TotalPages":totalPages,
+		"Pages": pages,
 	})
 }
 
