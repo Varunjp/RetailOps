@@ -34,6 +34,8 @@ func DbInit(){
 		&models.Credits{},
 		&models.Batch{},
 		&models.BatchProduction{},
+		&models.LineSaleClosing{},
+		&models.LineSaleExpenses{},
 	)
 
 	if autoerr != nil{

@@ -66,23 +66,42 @@ type CounterSale struct{
 }
 
 type LineSale struct{
-	ID 				uint		`gorm:"primaryKey;autoIncrement"`
-	EmpID			string 
-	ProductID 		uint		`gorm:"index"`
+	ID 				uint					`gorm:"primaryKey;autoIncrement"`
+	EmpID			string 					`gorm:"not null"`
+	ProductID 		uint					`gorm:"index"`
 	ItemName 		string 		
 	Rate			float64
 	StockIn			int 
 	StockOut		int
 	Damage			int 
-	SaleAmount		float64
-	Discount		float64
-	ActualSale		float64
-	Cash			float64
-	Balance			float64
-	Created_at 		time.Time
-	Product			Product 	`gorm:"constraint:ONDELETE:CASCADE;foreignKey: ProductID"`
+	Created_at 		time.Time				
+	Product			Product 				`gorm:"constraint:ONDELETE:CASCADE;foreignKey:ProductID"`
 	Deleted_at  	gorm.DeletedAt
-}	
+}
+
+type LineSaleClosing struct {
+	ID 				uint 					`gorm:"primaryKey;autoIncrement"`
+	EmpID 			string 					`gorm:"not null"`
+	SaleAmount		float64
+	Discount 		float64
+	ActualSale 		float64
+	Cash 			float64
+	AccountPayment	float64
+	Balance 		float64
+	Status 			bool 					`gorm:"default:false"`
+	Created_at   	time.Time
+	LineSaleExpenses []LineSaleExpenses 	`gorm:"constraint:ONDELETE:CASCADE;foreignKey:LineSaleID"`
+}
+
+type LineSaleExpenses struct{
+	ID 				uint 					`gorm:"primaryKey;autoIncrement"`
+	LineSaleID		uint 					`gorm:"not null"`
+	Type 			string
+	Amount 			float64
+	Created_at 		time.Time
+	LineSale		LineSale				`gorm:"constraint:ONDELETE:CASCADE;foreignKey:LineSaleID"`
+}
+
 
 type Batch struct{
 	ID 				uint		`gorm:"primaryKey;autoIncrement"`

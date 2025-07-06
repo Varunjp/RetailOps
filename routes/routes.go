@@ -23,4 +23,9 @@ func GetUrl(router *gin.Engine){
 	router.GET("/product/edit/:id",middleware.AuthMiddleware(),middleware.NoCaches(),controller.EditProductPage)
 	router.POST("/user/update-product/:id",middleware.AuthMiddleware(),middleware.NoCaches(),controller.EditProduct)
 
+	// Line sales
+	router.GET("/lineSale-items",middleware.AuthMiddleware(),middleware.NoCaches(),controller.LineSalesItemsPage)
+	router.GET("/items",controller.GetItems)
+	router.POST("/line-sale-items/save",middleware.AuthMiddleware(),middleware.NoCaches(),controller.SaveLineSaleItem)
+
 }

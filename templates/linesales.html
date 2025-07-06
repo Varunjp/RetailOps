@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Line Sales</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Check system color scheme on load
+        function updateTheme() {
+            if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+        
+        // Initial check
+        updateTheme();
+        
+        // Listen for system color scheme changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateTheme);
+    </script>
+    <style>
+        .sidebar {
+            transition: all 0.3s;
+        }
+        .sidebar.collapsed {
+            width: 70px;
+        }
+        .sidebar.collapsed .nav-text {
+            display: none;
+        }
+        .sidebar.collapsed .logo-text {
+            display: none;
+        }
+        .sidebar.collapsed .nav-item {
+            justify-content: center;
+        }
+        .content {
+            transition: all 0.3s;
+        }
+        .content.expanded {
+            margin-left: 70px;
+        }
+        .dashboard-card {
+            transition: all 0.3s;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="sidebar bg-blue-800 text-white w-64 fixed top-0 left-0 h-screen z-10">
+            <!-- Logo -->
+            <div class="p-4 flex items-center">
+                <div class="w-8 h-8 bg-white rounded flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-800" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4 a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <span class="logo-text ml-2 text-xl font-bold">SalesDash</span>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="flex-1 mt-6">
+                <ul>
+                    <li class="nav-item mb-2">
+                        <a href="#" class="flex items-center p-3 hover:bg-blue-700 rounded-r-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                            </svg>
+                            <span class="nav-text ml-3">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a href="#" class="flex items-center p-3 hover:bg-blue-700 rounded-r-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="nav-text ml-3">Counter Sales</span>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a href="/lineSale-items" class="flex items-center p-3 bg-blue-700 rounded-r-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="nav-text ml-3">Line Sales Item</span>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a href="/lineSale-closing" class="flex items-center p-3 hover:bg-blue-700 rounded-r-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="nav-text ml-3">Line Sales Closing</span>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a href="#" class="flex items-center p-3 hover:bg-blue-700 rounded-r-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="nav-text ml-3">Attendance</span>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a href="/user/products" class="flex items-center p-3 hover:bg-blue-700 rounded-r-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="nav-text ml-3">Products</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <!-- Collapse Button -->
+            <div class="p-4">
+                <button id="toggleSidebar" class="w-full flex items-center justify-center p-2 rounded-full bg-blue-700 hover:bg-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M15.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414zm-6 0a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 011.414 1.414L5.414 10l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="nav-text ml-2">Collapse</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+         <div class="ml-64">
+            <div class="min-h-screen overflow-y-auto">
+                <div class="container mx-auto px-4 py-8 h-screen overflow-y-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <h1 class="text-lg font-semibold text-gray-800 dark:text-white">Line Sales</h1>
+                        <!-- <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/d77f8f1f-270a-4e98-b5c9-2312dc99ee66.png" alt="Company logo with blue and white colors in modern sans-serif typography" class="h-10" /> -->
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h2 class="text-lg font-medium text-gray-800">Item Transaction Form</h2>
+                        </div>
+
+                        <div class="px-6 py-4">
+                            <!-- Main Form -->
+                            <form id="inventoryForm">
+                                <div id="itemsContainer">
+                                    <!-- Initial row -->
+                                    <div class="item-row grid grid-cols-8 gap-4 mb-4 items-end relative">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Item</label>
+                                            <select class="item-select mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border input-highlight">
+                                                <option value="">Select item</option>
+                                                <!-- auto populating -->
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Rate</label>
+                                            <input type="number" class="rate-input mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm input-highlight" step="0.01">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Stock In</label>
+                                            <input type="number" class="stock-in-input mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm input-highlight">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Stock Out</label>
+                                            <input type="number" class="stock-out-input mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm input-highlight">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Sale Item</label>
+                                            <input type="number" class="sale-item-input mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm input-highlight">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Damage</label>
+                                            <input type="number" class="damage-input mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm input-highlight">
+                                        </div>
+                                        <div class="flex justify-end">
+                                            <button type="button" class="remove-row-btn inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Add Row Button -->
+                                <div class="flex justify-end mb-6">
+                                    <button type="button" id="addRowBtn" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                        Add Item
+                                    </button>
+                                </div>
+
+                                <!-- Transaction Details -->
+                                <div class="footer-section px-4 py-5 rounded-lg">
+                                    <div class="mt-4 grid grid-cols-4 gap-4">
+                                    
+                                        <div class="col-span-3 flex justify-end items-end">
+                                            <button type="submit" id="saveBtn" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                                Save Transaction
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden mt-4">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h2 class="text-lg font-medium text-gray-800">Today's Transactions</h2>
+                        </div>
+
+                        <div class="px-6 py-4">
+                            <!-- Main Form -->
+                                <div class="bg-white dark:bg-gray-800 rounded-lg shadow mb-6">
+                                    <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                                        <h2 class="text-lg font-semibold text-gray-800 dark:text-white">Products</h2>
+                                    </div>
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full divide-y divide-gray-200">
+                                            <thead class="bg-gray-50 dark:bg-gray-800">
+                                                <tr>
+                                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">Product Name</th>
+                                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">Rate</th>
+                                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">StockOut</th>
+                                                    <!-- <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">Actions</th> -->
+                                                </tr>
+                                            </thead>
+                                            <tbody class="bg-white dark:text-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                                                <!-- Example rows -->
+                                                {{if .products}}
+
+                                                    {{ range .products}}
+                                                        <tr>
+                                                            <td class="px-6 py-4 whitespace-nowrap">{{ .Name}}</td>
+                                                            <td class="px-6 py-4 whitespace-nowrap">₹{{ .Rate}}</td>
+                                                            <td class="px-6 py-4 whitespace-nowrap">{{ .Stock}}</td>
+                                                         
+                                                        </tr>
+                                                    {{end}}
+                                                {{else}}
+                                                        <tr>
+                                                            <td class="px-6 py-4 whitespace-nowrap">No products</td>
+                                                            <td class="px-6 py-4 whitespace-nowrap">---</td>
+                                                            <td class="px-6 py-4 whitespace-nowrap">----</td>
+                                                            
+                                                        </tr>
+                                                {{end}}
+                                                <!-- Add more rows as needed -->
+                                            </tbody>
+                                        </table>
+
+                                        <!-- Pagination -->
+                                        <div class="flex justify-between items-center px-4 py-3 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+                                            <div>
+                                                <p class="text-sm text-gray-700 dark:text-gray-300">
+                                                    Page {{.CurrentPage}} of {{.TotalPages}}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <nav class="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                                    {{if gt .CurrentPage 1}}
+                                                        <a href="?page={{dec .CurrentPage}}" class="px-3 py-2 rounded-l-md border border-gray-300 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 hover:bg-gray-50">Previous</a>
+                                                    {{else}}
+                                                        <span class="px-3 py-2 rounded-l-md border border-gray-300 bg-gray-100 dark:bg-gray-700 text-sm font-medium text-gray-400">Previous</span>
+                                                    {{end}}
+
+                                                    {{range $i := .Pages}}
+                                                        <a href="?page={{$i}}" class="px-3 py-2 border border-gray-300 bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-white hover:bg-gray-50 {{if eq $.CurrentPage $i}}bg-blue-100 dark:bg-blue-600{{end}}">
+                                                            {{$i}}
+                                                        </a>
+                                                    {{end}}
+
+                                                    {{if lt .CurrentPage .TotalPages}}
+                                                        <a href="?page={{inc .CurrentPage}}" class="px-3 py-2 rounded-r-md border border-gray-300 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 hover:bg-gray-50">Next</a>
+                                                    {{else}}
+                                                        <span class="px-3 py-2 rounded-r-md border border-gray-300 bg-gray-100 dark:bg-gray-700 text-sm font-medium text-gray-400">Next</span>
+                                                    {{end}}
+                                                </nav>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                        </div>
+                    </div>
+
+                    <!-- Confirmation Modal -->
+                    <div id="confirmationModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+                        <div class="bg-white rounded-lg shadow-lg p-6 w-11/12 md:w-1/2">
+                            <h2 class="text-lg font-medium text-gray-800 mb-4">Confirm Transaction</h2>
+                            <div id="modalItemsContainer" class="max-h-[70vh] overflow-y-auto mb-4">
+                                <!-- Items will be populated here -->
+                            </div>
+                            <div class="flex justify-end">
+                                <button id="confirmBtn" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">Confirm</button>
+                                <button id="cancelBtn" class="ml-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+
+    <script>
+        // Toggle Sidebar
+        document.getElementById('toggleSidebar').addEventListener('click', function() {
+            const sidebar = document.querySelector('.sidebar');
+            const content = document.querySelector('.content');
+            sidebar.classList.toggle('collapsed');
+            content.classList.toggle('expanded');
+        });
+
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add new row functionality
+            document.getElementById('addRowBtn').addEventListener('click', function() {
+                const container = document.getElementById('itemsContainer');
+                const newRow = container.firstElementChild.cloneNode(true);
+                
+                // Clear all inputs in the new row
+                const inputs = newRow.querySelectorAll('input');
+                inputs.forEach(input => input.value = '');
+                
+                // Clear select value
+                newRow.querySelector('.item-select').value = '';
+                // newRow.querySelector('.item-select').innerHTML = `<option value="">Select item</option>` + itemOptionsHTML;
+                container.appendChild(newRow);
+                
+                // Add event listener to new remove button
+                newRow.querySelector('.remove-row-btn').addEventListener('click', function() {
+                    if (container.children.length > 1) {
+                        container.removeChild(newRow);
+                    } else {
+                        alert('Cannot remove the last row');
+                    }
+                });
+            });
+
+            // Remove row functionality for initial row
+            document.querySelector('.remove-row-btn').addEventListener('click', function() {
+                const container = document.getElementById('itemsContainer');
+                if (container.children.length > 1) {
+                    container.removeChild(this.closest('.item-row'));
+                } else {
+                    alert('Cannot remove the last row');
+                }
+            });
+
+            //load items
+            let itemsMap = {}; // to store itemId → rate mapping
+
+            fetch('/items')
+            .then(res => res.json())
+            .then(data => {
+                const options = data.map(item => {
+                // save rate in a map for later use
+                itemsMap[item.id] = item.rate;
+
+                return `<option value="${item.id}">${item.name}</option>`;
+                }).join('');
+
+                // update all current selects
+                document.querySelectorAll('.item-select').forEach(select => {
+                select.innerHTML = `<option value="">Select item</option>` + options;
+                });
+            })
+            .catch(err => console.error(err));
+
+            document.addEventListener('change', function (e) {
+                if (e.target.classList.contains('item-select')) {
+                    const itemId = e.target.value;
+                    const row = e.target.closest('.item-row');
+                    const rateInput = row.querySelector('.rate-input');
+
+                    if (itemId && itemsMap[itemId]) {
+                    rateInput.value = itemsMap[itemId];
+                    } else {
+                    rateInput.value = '';
+                    }
+                }
+            });
+
+            // Form submission
+            document.getElementById('inventoryForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Validate at least one item is selected
+                const hasSelectedItem = Array.from(document.querySelectorAll('.item-select')).some(
+                    select => select.value !== ''
+                );
+                
+                if (!hasSelectedItem) {
+                    alert('Please add at least one item');
+                    return;
+                }
+                
+                let isInvaild = false;
+                // Prepare data object
+                const formData = {
+                    items: []
+                };
+                
+                // Collect item data
+                document.querySelectorAll('.item-row').forEach(row => {
+                    const itemSelect = row.querySelector('.item-select');
+                    if (itemSelect.value) {
+                        const rate = parseFloat(row.querySelector('.rate-input').value) || 0;
+                        const stockIn = parseFloat(row.querySelector('.stock-in-input').value) || 0;
+                        const stockOut = parseFloat(row.querySelector('.stock-out-input').value) || 0;
+                        const saleItem = parseFloat(row.querySelector('.sale-item-input').value) || 0;
+                        const damage = parseFloat(row.querySelector('.damage-input').value) || 0;
+
+                        if (rate >=0 && stockIn >=0 && stockOut>=0 && saleItem>=0 && damage >= 0){
+                            formData.items.push({
+                                itemId: itemSelect.value,
+                                itemName: itemSelect.options[itemSelect.selectedIndex].text,
+                                rate: parseFloat(row.querySelector('.rate-input').value) || 0,
+                                stockIn: parseFloat(row.querySelector('.stock-in-input').value) || 0,
+                                stockOut: parseFloat(row.querySelector('.stock-out-input').value) || 0,
+                                saleItem: parseFloat(row.querySelector('.sale-item-input').value) || 0,
+                                damage: parseFloat(row.querySelector('.damage-input').value) || 0
+                            });
+                        }else{
+                            alert('Passed value cannot be less than zero');
+                            isInvaild = true
+                            return 
+                        }
+                        
+                    }
+                });
+
+                if (isInvaild){
+                    return;
+                }
+                
+                // Populate modal with item data
+                const modalItemsContainer = document.getElementById('modalItemsContainer');
+                modalItemsContainer.innerHTML = ''; // Clear previous items
+                formData.items.forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'flex justify-between mb-2';
+                    itemDiv.innerHTML = `
+                        <div class="flex-auto m-1">${item.itemName}</div>
+                        <div class="flex-auto m-1">
+                            <div class="flex-auto">
+                                <label class="text-sm font-medium text-gray-700 mb-1">Rate :</label>
+                                 <input type="number" value="${item.rate}" class="rate-input-modal" step="0.01" /></div>
+                            <div class="flex-auto">
+                                <label class="text-sm font-medium text-gray-700 mb-1">Stock In :</label>
+                                <input type="number" value="${item.stockIn}" class="stock-in-input-modal " /></div>
+                            <div class="flex-auto">
+                                <label class="text-sm font-medium text-gray-700 mb-1">Stock Out :</label>
+                                <input type="number" value="${item.stockOut}" class="stock-out-input-modal " /></div>
+                            <div class="flex-auto">
+                                <label class="text-sm font-medium text-gray-700 mb-1">Sale Item :</label>
+                                <input type="number" value="${item.saleItem}" class="sale-item-input-modal " /></div>
+                            <div class="flex-auto">
+                                <label class="text-sm font-medium text-gray-700 mb-1">Damage :</label>
+                                <input type="number" value="${item.damage}" class="damage-input-modal " /></div>
+                        </div>
+                    `;
+                    modalItemsContainer.appendChild(itemDiv);
+                });
+
+                // Show the modal
+                document.getElementById('confirmationModal').classList.remove('hidden');
+
+                // Handle confirmation
+                document.getElementById('confirmBtn').onclick = function() {
+                    // Update formData with edited values
+                    const updatedItems = [];
+                    document.querySelectorAll('#modalItemsContainer > div').forEach((itemDiv, index) => {
+                        const rateInput = itemDiv.querySelector('.rate-input-modal');
+                        const stockInInput = itemDiv.querySelector('.stock-in-input-modal');
+                        const stockOutInput = itemDiv.querySelector('.stock-out-input-modal');
+                        const saleItemInput = itemDiv.querySelector('.sale-item-input-modal');
+                        const damageInput = itemDiv.querySelector('.damage-input-modal');
+
+                        updatedItems.push({
+                            itemId: formData.items[index].itemId,
+                            itemName: formData.items[index].itemName,
+                            rate: parseFloat(rateInput.value) || 0,
+                            stockIn: parseFloat(stockInInput.value) || 0,
+                            stockOut: parseFloat(stockOutInput.value) || 0,
+                            saleItem: parseFloat(saleItemInput.value) || 0,
+                            damage: parseFloat(damageInput.value) || 0
+                        });
+                    });
+
+                    // Here you would typically send the updated data to your backend
+                    fetch('/line-sale-items/save', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ items: updatedItems })
+                    })
+                    .then(res => {
+                        if (!res.ok) throw new Error("Failed to save");
+                        return res.json();
+                    })
+                    .then(data => {
+                        alert(data.message || 'Transaction saved successfully!');
+                        document.getElementById('confirmationModal').classList.add('hidden');
+                        window.location.href = '/lineSale-items';
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert('Something went wrong while saving!');
+                    });
+                };
+
+                // Handle cancel
+                document.getElementById('cancelBtn').onclick = function() {
+                    document.getElementById('confirmationModal').classList.add('hidden');
+                };
+            });
+
+
+
+        });
+
+        
+    </script>
+
+
+</body>
+</html>
