@@ -220,7 +220,7 @@ func EditLineSale(c *gin.Context){
 	if err := db.Db.Where("id = ?",lineSaleId).First(&LineSaleItem).Error; err != nil{
 		session.Set("lineError","Could not fetch details of line sale item")
 		session.Save()
-		c.Redirect(http.StatusSeeOther,"lineSale-items")
+		c.Redirect(http.StatusSeeOther,"/lineSale-items")
 		return 
 	}
 
@@ -237,16 +237,28 @@ func EditLineSale(c *gin.Context){
 	if err := db.Db.Create(&tempItem).Error; err != nil{
 		session.Set("lineError","Failed to send request for edit")
 		session.Save()
-		c.Redirect(http.StatusSeeOther,"lineSale-items")
+		c.Redirect(http.StatusSeeOther,"/lineSale-items")
 		return 
 	}
 
 	if err := db.Db.Save(&LineSaleItem).Error; err != nil{
 		session.Set("lineError","Failed to send request for edit")
 		session.Save()
-		c.Redirect(http.StatusSeeOther,"lineSale-items")
+		c.Redirect(http.StatusSeeOther,"/lineSale-items")
 		return
 	}
 
-	c.Redirect(http.StatusSeeOther,"lineSale-items")
+	c.Redirect(http.StatusSeeOther,"/lineSale-items")
+}
+
+func LineSaleClosingPage(c *gin.Context){
+	session := sessions.Default(c)
+	lineError := session.Get("lineError")
+
+	if lineError != nil{
+		session.Delete("lineError")
+		session.Save()
+	}
+
+	c.HTML(http.StatusOK,"linesale_closing.html",gin.H{"error":lineError})
 }
