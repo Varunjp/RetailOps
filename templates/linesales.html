@@ -142,13 +142,40 @@
         </div>
         
         <!-- Main Content -->
+
          <div class="content flex-1 overflow-auto p-6">
+
+                    <div id="warning-banner" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 flex justify-between items-center mb-4">
+                        <div>
+                            <strong class="font-bold">Warning:</strong>
+                            <span>Please verify product stock first.</span>
+                        </div>
+                        <button onclick="document.getElementById('warning-banner').style.display='none'" 
+                                class="text-yellow-700 hover:text-yellow-900">
+                            ✖
+                        </button>
+                    </div>
+
+
                     <div class="flex justify-between items-center mb-6">
                         <h1 class="text-lg font-semibold text-gray-800 dark:text-white">Line Sales</h1>
                         <!-- <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/d77f8f1f-270a-4e98-b5c9-2312dc99ee66.png" alt="Company logo with blue and white colors in modern sans-serif typography" class="h-10" /> -->
                     </div>
 
-                    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    {{if .error}}
+                    <div id="errorAlert" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative max-w-md mx-auto mt-4 " role="alert">
+                            <strong class="font-bold">Error!</strong>
+                            <span class="block sm:inline">{{.error}}</span>
+                            <span class="absolute top-0 bottom-0 right-0 px-2 py-3">
+                                <svg id="closeAlertBtn" class="fill-current h-6 w-6 text-red-500 cursor-pointer" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <title>Close</title>
+                                <path d="M14.348 5.652a1 1 0 00-1.414 0L10 8.586 7.066 5.652a1 1 0 00-1.414 1.414L8.586 10l-2.934 2.934a1 1 0 101.414 1.414L10 11.414l2.934 2.934a1 1 0 001.414-1.414L11.414 10l2.934-2.934a1 1 0 000-1.414z"/>
+                                </svg>
+                            </span>
+                    </div>
+                    {{end}}
+
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden mt-2">
                         <div class="px-6 py-4 border-b border-gray-200">
                             <h2 class="text-lg font-medium text-gray-800">Item Transaction Form</h2>
                         </div>
@@ -534,6 +561,10 @@
 
 
 
+        });
+
+        document.getElementById('closeAlertBtn').addEventListener('click', function () {
+            document.getElementById('errorAlert').style.display = 'none';
         });
 
         

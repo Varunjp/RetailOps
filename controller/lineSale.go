@@ -7,6 +7,7 @@ import (
 	db "retialops/DB"
 	"retialops/helper"
 	"retialops/models"
+	responsemodel "retialops/models/responseModel"
 	"strconv"
 	"time"
 
@@ -135,7 +136,7 @@ func GetItems(c *gin.Context){
 func SaveLineSaleItem(c *gin.Context){
 	var inventoryReq inventoryRequest
 	tokenStr,_ := c.Cookie("JWT-User")
-	empId, errTk := helper.DecodeJWT(tokenStr)
+	empId,_, errTk := helper.DecodeJWT(tokenStr)
 
 	if errTk != nil{
 		log.Println("Error while extracting user details")
@@ -254,11 +255,95 @@ func EditLineSale(c *gin.Context){
 func LineSaleClosingPage(c *gin.Context){
 	session := sessions.Default(c)
 	lineError := session.Get("lineError")
+	tokenStr,_ := c.Cookie("JWT-User")
+	var saleCloses []responsemodel.LineSaleClosing
+	superUser,todayStatus := helper.LineSaleConditions(tokenStr)
+
+	if superUser {
+		var LineSalesClosings []models.LineSaleClosing
+		if err := db.Db.Find(&LineSalesClosings).Error; err != nil{
+			log.Println(err)
+		}
+
+		for _,closing := range LineSalesClosings{
+			saleCloses = append(saleCloses, responsemodel.LineSaleClosing{
+				ID: closing.ID,
+				Date: closing.Created_at.Format("2006-01-02"),
+				Sale_amount: closing.SaleAmount,
+				Discount: closing.Discount,
+				Actual_sale: closing.ActualSale,
+				Cash: closing.Cash,
+				Account: closing.AccountPayment,
+			})
+		}
+	}
 
 	if lineError != nil{
 		session.Delete("lineError")
 		session.Save()
 	}
 
-	c.HTML(http.StatusOK,"linesale_closing.html",gin.H{"error":lineError})
+	if superUser{
+		c.HTML(http.StatusOK,"linesale_closing.html",gin.H{
+			"error":lineError,
+			"superUser":superUser,
+			"todayStatus":todayStatus,
+			"linesaleclosing":saleCloses,
+		})
+		return 
+	}
+
+	c.HTML(http.StatusOK,"linesale_closing.html",gin.H{
+		"error":lineError,
+		"superUser":superUser,
+		"todayStatus":todayStatus,
+	})
+}
+
+func LineSaleClosing(c *gin.Context){
+	tokenStr,_ := c.Cookie("JWT-User")
+	empId,_,_ := helper.DecodeJWT(tokenStr)
+	session := sessions.Default(c)
+
+	sale_amount,_ := strconv.ParseFloat(c.PostForm("sale_amount"),64)
+	discount,_ := strconv.ParseFloat(c.PostForm("discount"),64)
+	actual_sale,_ := strconv.ParseFloat(c.PostForm("actual_sale"),64)
+	cash,_ := strconv.ParseFloat(c.PostForm("cash"),64)
+	account,_ := strconv.ParseFloat(c.PostForm("account"),64)
+	
+	var balance float64
+	if actual_sale - (cash + account) <= 0 {
+		balance = 0
+	}else{
+		balance = actual_sale - (cash + account)
+	}
+
+	balanceErr := helper.UpdateCreditBalance("lineSale",actual_sale,(cash+account))
+
+	if balanceErr != nil{
+		session.Set("lineError","Failed to update credit balance, Please try again later")
+		session.Save()
+		c.Redirect(http.StatusSeeOther,"/lineSale-closing")
+		return 
+	}
+
+	lineClosing := models.LineSaleClosing{
+		EmpID: empId,
+		SaleAmount: sale_amount,
+		Discount: discount,
+		ActualSale: actual_sale,
+		Cash: cash,
+		AccountPayment: account,
+		Balance: balance,
+		Created_at: time.Now(),
+	}
+
+	if err := db.Db.Create(&lineClosing).Error; err != nil {
+		session.Set("lineError","Failed to save line sale closing details, Please try again later")
+		session.Save()
+		c.Redirect(http.StatusSeeOther,"/lineSale-closing")
+		return 
+	}
+
+	c.Redirect(http.StatusFound,"/lineSale-closing")
 }

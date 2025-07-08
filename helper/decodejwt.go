@@ -7,7 +7,7 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-func DecodeJWT(tokenStr string) (string,error) {
+func DecodeJWT(tokenStr string) (string,bool,error) {
 	secretKey := os.Getenv("secret")
 	jwtsecret := []byte(secretKey)
 
@@ -19,13 +19,13 @@ func DecodeJWT(tokenStr string) (string,error) {
 	})
 
 	if err != nil || !token.Valid{
-		return "",fmt.Errorf("failed to get value from JWT")
+		return "",false,fmt.Errorf("failed to get value from JWT")
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims);
 	if !ok{
-		return "",fmt.Errorf("error while getting claims")
+		return "",false,fmt.Errorf("error while getting claims")
 	}
 
-	return claims["EmpID"].(string),nil
+	return claims["EmpID"].(string),claims["IsSuperUser"].(bool),nil
 }
