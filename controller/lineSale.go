@@ -258,10 +258,25 @@ func LineSaleClosingPage(c *gin.Context){
 	tokenStr,_ := c.Cookie("JWT-User")
 	var saleCloses []responsemodel.LineSaleClosing
 	superUser,todayStatus := helper.LineSaleConditions(tokenStr)
+	
+	// pagination for super user table
+	pageStr := c.DefaultQuery("page","1")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1{
+		page = 1
+	}
+	const pageSize = 10
+	var total int64
+	db.Db.Model(&models.LineSaleClosing{}).Count(&total)
+	totalPages := int(math.Ceil(float64(total)/float64(pageSize)))
+	if page > totalPages && totalPages != 0 {
+		page = totalPages
+	}
+	offset := (page - 1)*pageSize
 
 	if superUser {
 		var LineSalesClosings []models.LineSaleClosing
-		if err := db.Db.Find(&LineSalesClosings).Error; err != nil{
+		if err := db.Db.Limit(pageSize).Offset(offset).Find(&LineSalesClosings).Error; err != nil{
 			log.Println(err)
 		}
 
@@ -278,6 +293,21 @@ func LineSaleClosingPage(c *gin.Context){
 		}
 	}
 
+	// pagination conditions
+	var pages []int 
+	startPage := page - 2
+	if startPage < 1{
+		startPage = 1
+	}
+	endPage := startPage+4
+	if endPage > totalPages{
+		endPage = totalPages
+	}
+
+	for i := startPage; i<= endPage;i++{
+		pages = append(pages, i)
+	}
+	
 	if lineError != nil{
 		session.Delete("lineError")
 		session.Save()
@@ -289,6 +319,9 @@ func LineSaleClosingPage(c *gin.Context){
 			"superUser":superUser,
 			"todayStatus":todayStatus,
 			"linesaleclosing":saleCloses,
+			"CurrentPage":page,
+			"TotalPages":totalPages,
+			"Pages":pages,
 		})
 		return 
 	}
@@ -297,6 +330,9 @@ func LineSaleClosingPage(c *gin.Context){
 		"error":lineError,
 		"superUser":superUser,
 		"todayStatus":todayStatus,
+		"CurrentPage":page,
+		"TotalPages":totalPages,
+		"Pages":pages,
 	})
 }
 
