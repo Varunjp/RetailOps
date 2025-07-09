@@ -2,6 +2,7 @@ package helper
 
 import (
 	"fmt"
+	"log"
 	"retialops/models"
 	"retialops/utils"
 	"time"
@@ -36,4 +37,34 @@ func CreateSuperUser(Db *gorm.DB){
 	}else{
 		fmt.Println("Admin user already exist")
 	}
+}
+
+func CreateNormalUser(Db *gorm.DB){
+	var User models.User
+
+	if err := Db.Where("emp_id = ?","test").First(&User).Error; err != nil{
+		if err == gorm.ErrRecordNotFound{
+			hashpass,passerr := utils.HashPassword("pass")
+			if passerr != nil{
+				log.Println(passerr)
+			}
+			newUser := models.User{
+				Username: "test",
+				EmpID: "test",
+				Phone: "7438293728",
+				Password: hashpass,
+				Created_at: time.Now(),
+				SuperUser: false,
+				Status: "Active",
+			}
+
+			if err := Db.Create(&newUser).Error; err != nil{
+				log.Println(err)
+			}else{
+				log.Println("User created successfully")
+			}
+		}
+	}
+
+	log.Println("User already exist")
 }

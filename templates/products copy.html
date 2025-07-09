@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Check system color scheme on load
+        function updateTheme() {
+            if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+        
+        // Initial check
+        updateTheme();
+        
+        // Listen for system color scheme changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateTheme);
+    </script>
+    <style>
+        .sidebar {
+            transition: all 0.3s;
+        }
+        .sidebar.collapsed {
+            width: 70px;
+        }
+        .sidebar.collapsed .nav-text {
+            display: none;
+        }
+        .sidebar.collapsed .logo-text {
+            display: none;
+        }
+        .sidebar.collapsed .nav-item {
+            justify-content: center;
+        }
+        .content {
+            transition: all 0.3s;
+        }
+        .content.expanded {
+            margin-left: 70px;
+        }
+        .dashboard-card {
+            transition: all 0.3s;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="sidebar bg-blue-800 text-white w-64 flex flex-col">
+            <!-- Logo -->
+            <div class="p-4 flex items-center">
+                <div class="w-8 h-8 bg-white rounded flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-800" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4 a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <span class="logo-text ml-2 text-xl font-bold">SalesDash</span>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="flex-1 mt-6">
+                <ul>
+                    <li class="nav-item mb-2">
+                        <a href="#" class="flex items-center p-3 hover:bg-blue-700 rounded-r-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                            </svg>
+                            <span class="nav-text ml-3">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a href="#" class="flex items-center p-3 hover:bg-blue-700 rounded-r-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="nav-text ml-3">Counter Sales</span>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <button id="lineSalesBtn" class="w-full flex items-center p-3 hover:bg-blue-700 rounded-r-full focus:outline-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="nav-text ml-3 flex-1 text-left">Line Sales</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" id="lineSalesArrow" class="h-4 w-4 transform transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.25 4.25a.75.75 0 01-1.06 0L5.25 8.27a.75.75 0 01-.02-1.06z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        <ul id="lineSalesMenu" class="ml-8 mt-2 hidden">
+                            <li class="mb-1">
+                                <a href="/lineSale-items" class="flex items-center p-2 hover:bg-blue-700 rounded-r-full">
+                                    <span class="ml-2">Line Sales Item</span>
+                                </a>
+                            </li>
+                            <li class="mb-1">
+                                <a href="/lineSale-closing" class="flex items-center p-2 hover:bg-blue-700 rounded-r-full">
+                                    <span class="ml-2">Line Sales Closing</span>
+                                </a>
+                            </li>
+                            <!-- Add more tabs here -->
+                        </ul>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a href="#" class="flex items-center p-3 hover:bg-blue-700 rounded-r-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="nav-text ml-3">Attendance</span>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a href="/user/products" class="flex items-center p-3 bg-blue-700 rounded-r-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="nav-text ml-3">Products</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <!-- Collapse Button -->
+            <div class="p-4">
+                <button id="toggleSidebar" class="w-full flex items-center justify-center p-2 rounded-full bg-blue-700 hover:bg-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M15.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414zm-6 0a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 011.414 1.414L5.414 10l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="nav-text ml-2">Collapse</span>
+                </button>
+            </div>
+            <div class="p-4 mt-auto">
+                <button id="signoutBtn" class="w-full flex items-center justify-center p-2 rounded-full bg-red-600 hover:bg-red-700 text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="nav-text ml-2">Sign Out</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="content flex-1 overflow-auto p-6">
+
+            {{if .error}}
+            <div id="errorAlert" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative max-w-md mx-auto mt-4" role="alert">
+                    <strong class="font-bold">Error!</strong>
+                    <span class="block sm:inline">{{.error}}</span>
+                    <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
+                        <svg id="closeAlertBtn" class="fill-current h-6 w-6 text-red-500 cursor-pointer" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <title>Close</title>
+                        <path d="M14.348 5.652a1 1 0 00-1.414 0L10 8.586 7.066 5.652a1 1 0 00-1.414 1.414L8.586 10l-2.934 2.934a1 1 0 101.414 1.414L10 11.414l2.934 2.934a1 1 0 001.414-1.414L11.414 10l2.934-2.934a1 1 0 000-1.414z"/>
+                        </svg>
+                    </span>
+            </div>
+            {{end}}
+
+
+            <!-- Products Table -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow mb-6">
+                <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                    <h2 class="text-lg font-semibold text-gray-800 dark:text-white">Products</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50 dark:bg-gray-800">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">Product Name</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">Rate</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">Stock</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white dark:text-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                            <!-- Example rows -->
+                             {{if .products}}
+
+                                {{ range .products}}
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">{{ .Name}}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">₹{{ .Rate}}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">{{ .Stock}}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <a href="/product/edit/{{.ID}}" class="text-blue-600 hover:text-blue-900">Edit</a>
+                                        </td>
+                                    </tr>
+                                {{end}}
+                             {{else}}
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">No products</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">---</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">----</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <button class="text-blue-600 hover:text-blue-900">Edit</button>
+                                        </td>
+                                    </tr>
+                             {{end}}
+                            <!-- Add more rows as needed -->
+                        </tbody>
+                    </table>
+
+                     <!-- Pagination -->
+                    <div class="flex justify-between items-center px-4 py-3 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+                        <div>
+                            <p class="text-sm text-gray-700 dark:text-gray-300">
+                                Page {{.CurrentPage}} of {{.TotalPages}}
+                            </p>
+                        </div>
+                        <div>
+                            <nav class="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                {{if gt .CurrentPage 1}}
+                                    <a href="?page={{dec .CurrentPage}}" class="px-3 py-2 rounded-l-md border border-gray-300 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 hover:bg-gray-50">Previous</a>
+                                {{else}}
+                                    <span class="px-3 py-2 rounded-l-md border border-gray-300 bg-gray-100 dark:bg-gray-700 text-sm font-medium text-gray-400">Previous</span>
+                                {{end}}
+
+                                {{range $i := .Pages}}
+                                    <a href="?page={{$i}}" class="px-3 py-2 border border-gray-300 bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-white hover:bg-gray-50 {{if eq $.CurrentPage $i}}bg-blue-100 dark:bg-blue-600{{end}}">
+                                        {{$i}}
+                                    </a>
+                                {{end}}
+
+                                {{if lt .CurrentPage .TotalPages}}
+                                    <a href="?page={{inc .CurrentPage}}" class="px-3 py-2 rounded-r-md border border-gray-300 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 hover:bg-gray-50">Next</a>
+                                {{else}}
+                                    <span class="px-3 py-2 rounded-r-md border border-gray-300 bg-gray-100 dark:bg-gray-700 text-sm font-medium text-gray-400">Next</span>
+                                {{end}}
+                            </nav>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Add New Product Form -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
+                <h2 class="text-lg font-semibold text-gray-800 dark:text-white">Add New Product</h2>
+                <form id="addProductForm" class="mt-4" action="/user/add-product" method="POST">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="productName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Product Name</label>
+                            <input type="text" id="productName" name="productName" class="mt-1 block w-full py-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300" required>
+                        </div>
+                        <div>
+                            <label for="rate" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Rate</label>
+                            <input type="number" id="rate" name="rate" class="mt-1 block w-full py-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300" required step="0.01">
+                        </div>
+                        <div>
+                            <label for="stock" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Stock</label>
+                            <input type="number" id="stock" name="stock" class="mt-1 block w-full py-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300" required>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <button type="submit" class="w-full inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Add Product</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Products Table -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow mb-6">
+                <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                    <h2 class="text-lg font-semibold text-gray-800 dark:text-white">Inactive Products</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50 dark:bg-gray-800">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">Product Name</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">Rate</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">Stock</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white dark:text-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                            <!-- Example rows -->
+                             {{if .inactproducts}}
+
+                                {{ range .inactproducts}}
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">{{ .Name}}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">₹{{ .Rate}}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">{{ .Stock}}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <a href="/product/edit/{{.ID}}" class="text-blue-600 hover:text-blue-900">Edit</a>
+                                        </td>
+                                    </tr>
+                                {{end}}
+                             {{else}}
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">No products</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">---</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">----</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <button class="text-blue-600 hover:text-blue-900">Edit</button>
+                                        </td>
+                                    </tr>
+                             {{end}}
+                            <!-- Add more rows as needed -->
+                        </tbody>
+                    </table>
+
+                      <!-- Pagination -->
+                    <div class="flex justify-between items-center px-4 py-3 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+                        <div>
+                            <p class="text-sm text-gray-700 dark:text-gray-300">
+                                Page {{.CurrentPage}} of {{.TotalPages}}
+                            </p>
+                        </div>
+                        <div>
+                            <nav class="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                {{if gt .CurrentPage 1}}
+                                    <a href="?page={{dec .CurrentPage}}" class="px-3 py-2 rounded-l-md border border-gray-300 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 hover:bg-gray-50">Previous</a>
+                                {{else}}
+                                    <span class="px-3 py-2 rounded-l-md border border-gray-300 bg-gray-100 dark:bg-gray-700 text-sm font-medium text-gray-400">Previous</span>
+                                {{end}}
+
+                                {{range $i := .Pages}}
+                                    <a href="?page={{$i}}" class="px-3 py-2 border border-gray-300 bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-white hover:bg-gray-50 {{if eq $.CurrentPage $i}}bg-blue-100 dark:bg-blue-600{{end}}">
+                                        {{$i}}
+                                    </a>
+                                {{end}}
+
+                                {{if lt .CurrentPage .TotalPages}}
+                                    <a href="?page={{inc .CurrentPage}}" class="px-3 py-2 rounded-r-md border border-gray-300 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 hover:bg-gray-50">Next</a>
+                                {{else}}
+                                    <span class="px-3 py-2 rounded-r-md border border-gray-300 bg-gray-100 dark:bg-gray-700 text-sm font-medium text-gray-400">Next</span>
+                                {{end}}
+                            </nav>
+                        </div>
+                    </div>
+
+
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Toggle Sidebar
+        document.getElementById('toggleSidebar').addEventListener('click', function() {
+            const sidebar = document.querySelector('.sidebar');
+            const content = document.querySelector('.content');
+            sidebar.classList.toggle('collapsed');
+            content.classList.toggle('expanded');
+        });
+
+        document.getElementById('signoutBtn').addEventListener('click', function() {
+            // Add your sign-out logic here
+            
+            alert('Signing out...');
+            // window.location.href = '/logout'; // Example redirect
+        });
+
+        document.getElementById('closeAlertBtn').addEventListener('click', function () {
+            document.getElementById('errorAlert').style.display = 'none';
+        });
+
+        document.getElementById('lineSalesBtn').addEventListener('click', () => {
+            const menu = document.getElementById('lineSalesMenu');
+            const arrow = document.getElementById('lineSalesArrow');
+            menu.classList.toggle('hidden');
+            arrow.classList.toggle('rotate-180');
+        });
+
+    </script>
+</body>
+</html>

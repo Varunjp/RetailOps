@@ -22,6 +22,7 @@ func main() {
 	}
 	db.DbInit()
 	helper.CreateSuperUser(db.Db)
+	helper.CreateNormalUser(db.Db)
 	port := os.Getenv("PORT")
 
 	if port == ""{

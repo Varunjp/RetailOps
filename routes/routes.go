@@ -30,5 +30,6 @@ func GetUrl(router *gin.Engine){
 	router.GET("/line-sale/edit/:id",middleware.AuthMiddleware(),middleware.NoCaches(),controller.EditLineSaleItemPage)
 	router.POST("/linesale/update-item/:id",middleware.AuthMiddleware(),middleware.NoCaches(),controller.EditLineSale)
 	router.GET("/lineSale-closing",middleware.AuthMiddleware(),middleware.NoCaches(),middleware.CheckLineSaleClosing(),controller.LineSaleClosingPage)
+	router.POST("/linesale/closing",middleware.AuthMiddleware(),middleware.NoCaches(),controller.LineSaleClosing)
 
 }
