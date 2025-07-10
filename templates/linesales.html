@@ -98,7 +98,27 @@
                         <ul id="lineSalesMenu" class="ml-8 mt-2 hidden">
                             <li class="mb-1">
                                 <a href="/lineSale-items" class="flex items-center p-2 hover:bg-blue-700 rounded-r-full">
-                                    <span class="ml-2">Line Sales Item</span>
+                                    <span class="ml-2">Stock IN</span>
+                                </a>
+                            </li>
+                            <li class="mb-1">
+                                <a href="/lineSale-stockout" class="flex items-center p-2 hover:bg-blue-700 rounded-r-full">
+                                    <span class="ml-2">Stock Out</span>
+                                </a>
+                            </li>
+                            <li class="mb-1">
+                                <a href="/lineSale-vypar" class="flex items-center p-2 hover:bg-blue-700 rounded-r-full">
+                                    <span class="ml-2">Vyapar Stock</span>
+                                </a>
+                            </li>
+                            <li class="mb-1">
+                                <a href="/lineSale-sales" class="flex items-center p-2 hover:bg-blue-700 rounded-r-full">
+                                    <span class="ml-2">Sales</span>
+                                </a>
+                            </li>
+                            <li class="mb-1">
+                                <a href="/lineSale-expense" class="flex items-center p-2 hover:bg-blue-700 rounded-r-full">
+                                    <span class="ml-2">Expenses</span>
                                 </a>
                             </li>
                             <li class="mb-1">
@@ -183,7 +203,7 @@
 
                     <div class="bg-white rounded-lg shadow-md overflow-hidden mt-2">
                         <div class="px-6 py-4 border-b border-gray-200">
-                            <h2 class="text-lg font-medium text-gray-800">Item Transaction Form</h2>
+                            <h2 class="text-lg font-medium text-gray-800">Item Stock in Form</h2>
                         </div>
 
                         <div class="px-6 py-4">
@@ -207,7 +227,7 @@
                                             <label class="block text-sm font-medium text-gray-700 mb-1">Stock In</label>
                                             <input type="number" class="stock-in-input mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm input-highlight">
                                         </div>
-                                        <div>
+                                        <!-- <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1">Stock Out</label>
                                             <input type="number" class="stock-out-input mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm input-highlight">
                                         </div>
@@ -218,7 +238,7 @@
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1">Damage</label>
                                             <input type="number" class="damage-input mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm input-highlight">
-                                        </div>
+                                        </div> -->
                                         <div class="flex justify-end">
                                             <button type="button" class="remove-row-btn inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                                 Remove
@@ -228,17 +248,17 @@
                                 </div>
 
                                 <!-- Add Row Button -->
-                                <div class="flex justify-end mb-6">
+                                <div class="flex justify mb-6">
                                     <button type="button" id="addRowBtn" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                         Add Item
                                     </button>
                                 </div>
 
                                 <!-- Transaction Details -->
-                                <div class="footer-section px-4 py-5 rounded-lg">
+                                <div class="footer-section px-0 py-5 rounded-lg">
                                     <div class="mt-4 grid grid-cols-4 gap-4">
                                     
-                                        <div class="col-span-3 flex justify-end items-end">
+                                        <div class="col-span-3 flex justify items-end">
                                             <button type="submit" id="saveBtn" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                                                 Save Transaction
                                             </button>
@@ -266,7 +286,7 @@
                                                 <tr>
                                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">Product Name</th>
                                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">Rate</th>
-                                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">StockOut</th>
+                                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">Stock In</th>
                                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wider">Actions</th>
                                                 </tr>
                                             </thead>
@@ -461,25 +481,21 @@
                     if (itemSelect.value) {
                         const rate = parseFloat(row.querySelector('.rate-input').value) || 0;
                         const stockIn = parseFloat(row.querySelector('.stock-in-input').value) || 0;
-                        const stockOut = parseFloat(row.querySelector('.stock-out-input').value) || 0;
-                        const saleItem = parseFloat(row.querySelector('.sale-item-input').value) || 0;
-                        const damage = parseFloat(row.querySelector('.damage-input').value) || 0;
+                        // const stockOut = parseFloat(row.querySelector('.stock-out-input').value) || 0;
+                        // const saleItem = parseFloat(row.querySelector('.sale-item-input').value) || 0;
+                        // const damage = parseFloat(row.querySelector('.damage-input').value) || 0;
 
-                        if (rate >=0 && stockIn >=0 && stockOut>=0 && saleItem>=0 && damage >= 0){
-                            formData.items.push({
-                                itemId: itemSelect.value,
-                                itemName: itemSelect.options[itemSelect.selectedIndex].text,
-                                rate: parseFloat(row.querySelector('.rate-input').value) || 0,
-                                stockIn: parseFloat(row.querySelector('.stock-in-input').value) || 0,
-                                stockOut: parseFloat(row.querySelector('.stock-out-input').value) || 0,
-                                saleItem: parseFloat(row.querySelector('.sale-item-input').value) || 0,
-                                damage: parseFloat(row.querySelector('.damage-input').value) || 0
-                            });
-                        }else{
-                            alert('Passed value cannot be less than zero');
-                            isInvaild = true
-                            return 
-                        }
+                        
+                        formData.items.push({
+                            itemId: itemSelect.value,
+                            itemName: itemSelect.options[itemSelect.selectedIndex].text,
+                            rate: parseFloat(row.querySelector('.rate-input').value) || 0,
+                            stockIn: parseFloat(row.querySelector('.stock-in-input').value) || 0
+                            // stockOut: parseFloat(row.querySelector('.stock-out-input').value) || 0,
+                            // saleItem: parseFloat(row.querySelector('.sale-item-input').value) || 0,
+                            // damage: parseFloat(row.querySelector('.damage-input').value) || 0
+                        });
+                        
                         
                     }
                 });
@@ -503,15 +519,7 @@
                             <div class="flex-auto">
                                 <label class="text-sm font-medium text-gray-700 mb-1">Stock In :</label>
                                 <input type="number" value="${item.stockIn}" class="stock-in-input-modal " /></div>
-                            <div class="flex-auto">
-                                <label class="text-sm font-medium text-gray-700 mb-1">Stock Out :</label>
-                                <input type="number" value="${item.stockOut}" class="stock-out-input-modal " /></div>
-                            <div class="flex-auto">
-                                <label class="text-sm font-medium text-gray-700 mb-1">Sale Item :</label>
-                                <input type="number" value="${item.saleItem}" class="sale-item-input-modal " /></div>
-                            <div class="flex-auto">
-                                <label class="text-sm font-medium text-gray-700 mb-1">Damage :</label>
-                                <input type="number" value="${item.damage}" class="damage-input-modal " /></div>
+                            
                         </div>
                     `;
                     modalItemsContainer.appendChild(itemDiv);
@@ -527,21 +535,16 @@
                     document.querySelectorAll('#modalItemsContainer > div').forEach((itemDiv, index) => {
                         const rateInput = itemDiv.querySelector('.rate-input-modal');
                         const stockInInput = itemDiv.querySelector('.stock-in-input-modal');
-                        const stockOutInput = itemDiv.querySelector('.stock-out-input-modal');
-                        const saleItemInput = itemDiv.querySelector('.sale-item-input-modal');
-                        const damageInput = itemDiv.querySelector('.damage-input-modal');
 
                         updatedItems.push({
                             itemId: formData.items[index].itemId,
                             itemName: formData.items[index].itemName,
                             rate: parseFloat(rateInput.value) || 0,
-                            stockIn: parseFloat(stockInInput.value) || 0,
-                            stockOut: parseFloat(stockOutInput.value) || 0,
-                            saleItem: parseFloat(saleItemInput.value) || 0,
-                            damage: parseFloat(damageInput.value) || 0
+                            stockIn: parseFloat(stockInInput.value) || 0
                         });
                     });
-
+                    
+                    console.log(updatedItems)
                     // Here you would typically send the updated data to your backend
                     fetch('/line-sale-items/save', {
                         method: 'POST',
