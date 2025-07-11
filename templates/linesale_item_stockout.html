@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Line Sale Stock Out</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Check system color scheme on load
+        function updateTheme() {
+            if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+        
+        // Initial check
+        updateTheme();
+        
+        // Listen for system color scheme changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateTheme);
+    </script>
+    <style>
+        :root {
+            --primary: #3a86ff;
+            --secondary: #8338ec;
+            --success: #06d6a0;
+            --warning: #ffbe0b;
+            --danger: #ef476f;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --border-radius: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+
+        .select-container {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: all 0.3s ease;
+            margin-bottom: 5px;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.2);
+        }
+
+        .form-container {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .form-header {
+            font-weight: 600;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+            color: var(--secondary);
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #2a75e6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            max-width: 500px;
+            width: 90%;
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-header {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .modal-body {
+            margin-bottom: 25px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .modal-btn {
+            width: auto;
+            margin-top: 0;
+        }
+
+        .modal-btn.cancel {
+            background-color: var(--danger);
+        }
+
+        .modal-btn.cancel:hover {
+            background-color: #d93a60;
+        }
+
+        .modal-btn.confirm {
+            background-color: var(--success);
+        }
+
+        .modal-btn.confirm:hover {
+            background-color: #05c08f;
+        }
+
+        .error {
+            color: var(--danger);
+            font-size: 14px;
+            margin-bottom: 10px;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto;
+            border: 4px solid rgba(58, 134, 255, 0.1);
+            border-left-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            button {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+        .sidebar {
+            transition: all 0.3s;
+        }
+        .sidebar.collapsed {
+            width: 70px;
+        }
+        .sidebar.collapsed .nav-text {
+            display: none;
+        }
+        .sidebar.collapsed .logo-text {
+            display: none;
+        }
+        .sidebar.collapsed .nav-item {
+            justify-content: center;
+        }
+        .content {
+            transition: all 0.3s;
+        }
+        .content.expanded {
+            margin-left: 70px;
+        }
+        .dashboard-card {
+            transition: all 0.3s;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900">
+    <div class="flex h-screen">
+
+        <!-- Sidebar -->
+        <div class="sidebar bg-blue-800 text-white w-64 flex flex-col">
+            <!-- Logo -->
+            <div class="p-4 flex items-center">
+                <div class="w-8 h-8 bg-white rounded flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-800" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4 a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <span class="logo-text ml-2 text-xl font-bold">SalesDash</span>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="flex-1 mt-6">
+                <ul>
+                    <li class="nav-item mb-2">
+                        <a href="#" class="flex items-center p-3 hover:bg-blue-700 rounded-r-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                            </svg>
+                            <span class="nav-text ml-3">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a href="#" class="flex items-center p-3 hover:bg-blue-700 rounded-r-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="nav-text ml-3">Counter Sales</span>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <button id="lineSalesBtn" class="w-full flex items-center p-3 bg-blue-700 rounded-r-full focus:outline-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="nav-text ml-3 flex-1 text-left">Line Sales</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" id="lineSalesArrow" class="h-4 w-4 transform transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.25 4.25a.75.75 0 01-1.06 0L5.25 8.27a.75.75 0 01-.02-1.06z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        <ul id="lineSalesMenu" class="ml-8 mt-2 hidden">
+                            <li class="mb-1">
+                                <a href="/lineSale-items" class="flex items-center p-2 hover:bg-blue-700 rounded-r-full">
+                                    <span class="ml-2">Stock IN</span>
+                                </a>
+                            </li>
+                            <li class="mb-1">
+                                <a href="/lineSale-stockout" class="flex items-center p-2 hover:bg-blue-700 rounded-r-full">
+                                    <span class="ml-2">Stock Out</span>
+                                </a>
+                            </li>
+                            <li class="mb-1">
+                                <a href="/lineSale-vypar" class="flex items-center p-2 hover:bg-blue-700 rounded-r-full">
+                                    <span class="ml-2">Vyapar Stock</span>
+                                </a>
+                            </li>
+                            <li class="mb-1">
+                                <a href="/lineSale-sales" class="flex items-center p-2 hover:bg-blue-700 rounded-r-full">
+                                    <span class="ml-2">Sales</span>
+                                </a>
+                            </li>
+                            <li class="mb-1">
+                                <a href="/lineSale-expense" class="flex items-center p-2 hover:bg-blue-700 rounded-r-full">
+                                    <span class="ml-2">Expenses</span>
+                                </a>
+                            </li>
+                            <li class="mb-1">
+                                <a href="/lineSale-closing" class="flex items-center p-2 hover:bg-blue-700 rounded-r-full">
+                                    <span class="ml-2">Line Sales Closing</span>
+                                </a>
+                            </li>
+                            <!-- Add more tabs here -->
+                        </ul>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a href="#" class="flex items-center p-3 hover:bg-blue-700 rounded-r-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="nav-text ml-3">Attendance</span>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a href="/user/products" class="flex items-center p-3 hover:bg-blue-700 rounded-r-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="nav-text ml-3">Products</span>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a href="/smrd/vehicles" class="flex items-center p-3 hover:bg-blue-700 rounded-r-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M3 3a1 1 0 00-1 1v10a2 2 0 002 2h1a2 2 0 004 0h4a2 2 0 004 0h1a1 1 0 001-1v-4a1 1 0 00-.293-.707l-3-3A1 1 0 0014 7h-3V4a1 1 0 00-1-1H3zm10 5h1.586L17 10.414V12h-4V8zM5 15a1 1 0 110-2 1 1 0 010 2zm10 0a1 1 0 110-2 1 1 0 010 2z"/>
+                            </svg>
+                            <span class="nav-text ml-3">Vehicles</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <!-- Collapse Button -->
+            <div class="p-4">
+                <button id="toggleSidebar" class="w-full flex items-center justify-center p-2 rounded-full bg-blue-700 hover:bg-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M15.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414zm-6 0a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 011.414 1.414L5.414 10l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="nav-text ml-2">Collapse</span>
+                </button>
+            </div>
+            <div class="p-4 mt-auto">
+                <button id="signoutBtn" class="w-full flex items-center justify-center p-2 rounded-full bg-red-600 hover:bg-red-700 text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="nav-text ml-2">Sign Out</span>
+                </button>
+            </div>
+        </div>
+    
+        <div class="content flex-1 overflow-auto p-6">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden mt-4">
+
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-medium text-gray-800">Line sale StockOut</h2>
+                </div>
+
+                {{if .error}}
+                    <div id="errorAlert" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative max-w-md mx-auto mt-4 " role="alert">
+                            <strong class="font-bold">Error!</strong>
+                            <span class="block sm:inline">{{.error}}</span>
+                            <span class="absolute top-0 bottom-0 right-0 px-2 py-3">
+                                <svg id="closeAlertBtn" class="fill-current h-6 w-6 text-red-500 cursor-pointer" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <title>Close</title>
+                                <path d="M14.348 5.652a1 1 0 00-1.414 0L10 8.586 7.066 5.652a1 1 0 00-1.414 1.414L8.586 10l-2.934 2.934a1 1 0 101.414 1.414L10 11.414l2.934 2.934a1 1 0 001.414-1.414L11.414 10l2.934-2.934a1 1 0 000-1.414z"/>
+                                </svg>
+                            </span>
+                    </div>
+                    {{end}}
+
+                    {{ if .message}}
+                        <div id="successAlert" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative max-w-md mx-auto mt-4" role="alert">
+                            <strong class="font-bold">Success!</strong>
+                            <span class="block sm:inline">{{.message}}</span>
+                            <span class="absolute top-0 bottom-0 right-0 px-2 py-3">
+                                <svg id="closeSuccessBtn" class="fill-current h-6 w-6 text-green-500 cursor-pointer" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                    <title>Close</title>
+                                    <path d="M14.348 5.652a1 1 0 00-1.414 0L10 8.586 7.066 5.652a1 1 0 00-1.414 1.414L8.586 10l-2.934 2.934a1 1 0 101.414 1.414L10 11.414l2.934 2.934a1 1 0 001.414-1.414L11.414 10l2.934-2.934a1 1 0 000-1.414z"/>
+                                </svg>
+                            </span>
+                        </div>
+                    {{end}}
+
+                <!-- <h1>Vehicle Inventory Management</h1> -->
+                <div class="px-6 py-4">
+                     <div class="select-container">
+                        <label for="vehicle-select">Select Vehicle</label>
+                        <select id="vehicle-select">
+                        <option value="">-- Select a Vehicle --</option>
+                        <!-- Options loaded dynamically -->
+                        </select>
+                        <div class="error" id="vehicle-error" style="display:none;">Please select a vehicle</div>
+                    </div>
+
+                    <div class="loading" id="loading" style="display:none;">
+                        <div class="spinner"></div>
+                        <p>Loading inventory...</p>
+                    </div>
+
+                    <div class="form-container" id="form-container" style="display:none;">
+                        <div class="form-header">Inventory Items</div>
+                        <div class="form-row">
+                        <span>Item Name</span>
+                        <span>Stock In</span>
+                        <span>Stock Out</span>
+                        </div>
+
+                        <div id="inventory-items">
+                        <!-- Items loaded dynamically -->
+                        </div>
+
+                        <button id="submit-btn">Submit Stock Update</button>
+                        <div class="error" id="form-error" style="display:none;">Please fill all required fields</div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="confirmation-modal">
+            <div class="modal-content">
+                <div class="modal-header">Confirm Submission</div>
+                <div class="modal-body" id="confirmation-content">
+                    Are you sure you want to submit these stock updates? This action cannot be undone.
+                </div>
+                <div class="modal-footer">
+                    <button class="modal-btn cancel" id="cancel-btn">Cancel</button>
+                    <button class="modal-btn confirm" id="confirm-btn">Confirm</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+
+        document.getElementById('toggleSidebar').addEventListener('click', function() {
+            const sidebar = document.querySelector('.sidebar');
+            const content = document.querySelector('.content');
+            sidebar.classList.toggle('collapsed');
+            content.classList.toggle('expanded');
+        });
+
+        document.getElementById('lineSalesBtn').addEventListener('click', function () {
+            const menu = document.getElementById('lineSalesMenu');
+            const arrow = document.getElementById('lineSalesArrow');
+            menu.classList.toggle('hidden');
+            arrow.classList.toggle('rotate-180');
+        });
+
+        document.addEventListener('DOMContentLoaded',function(){
+            const closeBtn = document.getElementById('closeAlertBtn');
+            const alertBox = document.getElementById('errorAlert');
+
+            if (closeBtn && alertBox){
+                alertBox.style.display = 'none';
+            }
+        })
+        
+        document.addEventListener('DOMContentLoaded', function () {
+            const closeBtn = document.getElementById('closeSuccessBtn');
+            const alertBox = document.getElementById('successAlert');
+
+            if (closeBtn && alertBox) {
+                closeBtn.addEventListener('click', function () {
+                alertBox.style.display = 'none';
+                });
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const vehicleSelect = document.getElementById('vehicle-select');
+            const vehicleError = document.getElementById('vehicle-error');
+            const loading = document.getElementById('loading');
+            const formContainer = document.getElementById('form-container');
+            const inventoryItems = document.getElementById('inventory-items');
+            const formError = document.getElementById('form-error');
+            const submitBtn = document.getElementById('submit-btn')
+
+            // fetch vehicles
+            fetch('/smrd/vehicles-list')
+                .then(res => res.json())
+                .then(vehicles => {
+                vehicles.forEach(vehicle => {
+                    const option = document.createElement('option');
+                    option.value = vehicle.id;
+                    option.textContent = `${vehicle.name} (License: ${vehicle.license})`;
+                    vehicleSelect.appendChild(option);
+                });
+                })
+                .catch(err => {
+                console.error('Error loading vehicles:', err);
+                });
+
+
+            // Load inventory for selected vehicle
+            vehicleSelect.addEventListener('change', function() {
+                const vehicleId = vehicleSelect.value;
+                vehicleError.style.display = 'none';
+                inventoryItems.innerHTML = '';
+                formContainer.style.display = 'none';
+
+                if (!vehicleId) {
+                vehicleError.style.display = 'block';
+                return;
+                }
+
+                loading.style.display = 'block';
+
+                fetch(`/smrd/linesale-stockout?vehicle_id=${vehicleId}`)
+                .then(res => res.json())
+                .then(items => {
+                    loading.style.display = 'none';
+                    formContainer.style.display = 'block';
+
+                    items.forEach(item => {
+                    const row = document.createElement('div');
+                    row.classList.add('form-row');
+                    row.dataset.itemId = item.id;
+                    row.innerHTML = `
+                        <span>${item.name}</span>
+                        <input type="number" name="stock_in_${item.id}" value="${item.stockin}" placeholder="0" readonly>
+                        <input type="number" name="stock_out_${item.id}" placeholder="0">
+                    `;
+                    inventoryItems.appendChild(row);
+                    });
+                })
+                .catch(err => {
+                    loading.style.display = 'none';
+                    console.error('Error loading inventory:', err);
+                });
+            });
+
+
+            document.getElementById('submit-btn').addEventListener('click', () => {
+                const vehicleId = vehicleSelect.value;
+                if (!vehicleId) {
+                vehicleError.style.display = 'block';
+                return;
+                }
+
+                const data = {
+                    vehicle_id: vehicleId,
+                    stock_updates: []
+                };
+
+                inventoryItems.querySelectorAll('.form-row').forEach(row => {
+                    const itemId = row.dataset.itemId; // 👈 get hidden id
+                    const [nameSpan, stockInInput, stockOutInput] = row.children;
+
+                    data.stock_updates.push({
+                        item_id: itemId,
+                        item_name: nameSpan.textContent,
+                        stock_in: parseInt(stockInInput.value) || 0,
+                        stock_out: parseInt(stockOutInput.value) || 0
+                    });
+                });
+
+                fetch('/smrd/linesale-stockout', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+                })
+                .then(res => {
+                if (res.ok) {
+                    alert('Stock updated successfully');
+                    window.location.href = '/lineSale-stockout'
+                } else {
+                    formError.style.display = 'block';
+                }
+                })
+                .catch(err => {
+                console.error('Error submitting stock update:', err);
+                formError.style.display = 'block';
+                });
+            });
+
+        });
+
+    </script>
+</body>
+</html>

@@ -69,6 +69,7 @@ type LineSale struct{
 	ID 				uint					`gorm:"primaryKey;autoIncrement"`
 	EmpID			string 					`gorm:"not null"`
 	ProductID 		uint					`gorm:"index"`
+	Vehicle 		string 					
 	ItemName 		string 		
 	Rate			float64
 	StockIn			int 
@@ -136,4 +137,12 @@ type Credits struct{
 	Type 		string		`gorm:"not null;unique"`
 	Balance 	float64
 	Created_at	time.Time
+}
+
+type Vehicle struct{
+	ID			uint 		`gorm:"primaryKey;autoIncrement"`
+	Name		string		`gorm:"not null"`
+	License 	string		`gorm:"unique"`
+	Created_at 	time.Time
+	Delete_at 	gorm.DeletedAt
 }

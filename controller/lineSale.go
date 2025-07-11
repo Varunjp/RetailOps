@@ -21,6 +21,16 @@ func LineSalesItemsPage(c *gin.Context){
 
 	session := sessions.Default(c)
 	lineError := session.Get("lineError")
+	message := session.Get("message")
+
+	// get vehicle details
+	var Vehicle []models.Vehicle
+
+	if err := db.Db.Find(&Vehicle).Error; err != nil{
+		log.Println("Error in getting vehicle details in line sale item page :",err)
+	}
+
+	//pagination constraints
 	pageStr := c.DefaultQuery("page","1")
 	page, err := strconv.Atoi(pageStr)
 	if err != nil || page < 1{
@@ -31,7 +41,7 @@ func LineSalesItemsPage(c *gin.Context){
 
 	const pageSize = 10
 	var total int64
-	db.Db.Model(&models.LineSale{}).Where("created_at BETWEEN ? AND ? ",today+" 00:00:00",today+" 23:59:59").Count(&total)
+	query := db.Db.Model(&models.LineSale{}).Where("created_at BETWEEN ? AND ? ",today+" 00:00:00",today+" 23:59:59").Count(&total)
 
 	totalPages := int(math.Ceil(float64(total)/float64(pageSize)))
 
@@ -39,8 +49,11 @@ func LineSalesItemsPage(c *gin.Context){
 		page = totalPages
 	}
 	offset := (page - 1)* pageSize
+	
+	// data fetching 
+
 	var lineSales []models.LineSale
-	if err := db.Db.Where("created_at >= ? AND created_at <= ? ",today+" 00:00:00",today+" 23:59:59").Limit(pageSize).Offset(offset).Find(&lineSales).Error; err != nil{
+	if err := query.Limit(pageSize).Offset(offset).Find(&lineSales).Error; err != nil{
 		if err != gorm.ErrRecordNotFound{
 			log.Println("Failed to retrive data from db :",err)
 			c.HTML(http.StatusInternalServerError,"linesales.html",gin.H{"error":"Failed to retrive today's data"})
@@ -52,6 +65,7 @@ func LineSalesItemsPage(c *gin.Context){
 		ID 			uint 
 		Name 		string
 		Rate 		float64
+		Vehicle 	string
 		Stock 		int 
 	}
 
@@ -61,6 +75,7 @@ func LineSalesItemsPage(c *gin.Context){
 			ID: item.ID,
 			Name: item.ItemName,
 			Rate: item.Rate,
+			Vehicle: item.Vehicle,
 			Stock: item.StockIn,
 		})
 	}
@@ -84,12 +99,19 @@ func LineSalesItemsPage(c *gin.Context){
 		session.Save()
 	}
 
+	if message != nil{
+		session.Delete("message")
+		session.Save()
+	}
+
 	c.HTML(http.StatusOK,"linesales.html",gin.H{
 		"products":lineSalesResponse,
 		"CurrentPage":page,
 		"TotalPages":totalPages,
 		"Pages":pages,
 		"error":lineError,
+		"message":message,
+		"Vehicle":Vehicle,
 	})
 }
 
@@ -110,6 +132,9 @@ func GetItems(c *gin.Context){
 	var resItem []Item
 
 	for _,product := range Products{
+		if product.ProductDetail[0].Stock < 1{
+			continue
+		}
 		resItem = append(resItem, Item{
 			ID : product.ID,
 			Name: product.ItemName,

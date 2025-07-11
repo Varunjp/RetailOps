@@ -8,5 +8,8 @@ type inventoryItem struct {
 }
 
 type InventoryRequest struct {
+	Transactions struct {
+		Vehicle string `json:"vehicle"`
+	} `json:"transaction"`
 	Items []inventoryItem `json:"items"`
 }

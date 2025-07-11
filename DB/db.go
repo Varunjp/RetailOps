@@ -37,6 +37,7 @@ func DbInit(){
 		&models.LineSaleClosing{},
 		&models.LineSaleExpenses{},
 		&models.LineSaleEdit{},
+		&models.Vehicle{},
 	)
 
 	if autoerr != nil{

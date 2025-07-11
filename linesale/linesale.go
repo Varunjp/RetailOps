@@ -10,6 +10,7 @@ import (
 	"retialops/models/getitems"
 	"time"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,6 +20,7 @@ func LineSaleStockIn(c *gin.Context) {
 	var inventoryReq getitems.InventoryRequest
 	tokenStr, _ := c.Cookie("JWT-User")
 	empId, _, errTk := helper.DecodeJWT(tokenStr)
+	session := sessions.Default(c)
 
 	if errTk != nil{
 		log.Println("Error while extracting user details :",errTk)
@@ -29,6 +31,12 @@ func LineSaleStockIn(c *gin.Context) {
 	if err := c.ShouldBindJSON(&inventoryReq); err != nil{
 		log.Println("Error while getting inventory data :",err)
 		c.JSON(http.StatusBadRequest,gin.H{"error":"Invalid request"})
+		return 
+	}
+
+	if inventoryReq.Transactions.Vehicle == ""{
+		log.Println("Error no vehicle value received")
+		c.JSON(http.StatusBadRequest,gin.H{"error":"Vehicle info not passed"})
 		return 
 	}
 
@@ -43,10 +51,11 @@ func LineSaleStockIn(c *gin.Context) {
 			return 
 		}
 
-		if item.StockIn < 0{
-			c.JSON(http.StatusBadRequest,gin.H{"error":"Stock in cannot be less than zero"})
+		if item.StockIn < 0 || item.StockIn == 0{
+			c.JSON(http.StatusBadRequest,gin.H{"error":"Stock in cannot be less than or equal to zero"})
 			return 
 		}
+
 	}
 
 
@@ -57,6 +66,7 @@ func LineSaleStockIn(c *gin.Context) {
 
 		lineSale := models.LineSale{
 			EmpID: empId,
+			Vehicle: inventoryReq.Transactions.Vehicle,
 			ProductID: product.ID,
 			ItemName: product.ItemName,
 			Rate: item.Rate,
@@ -73,5 +83,8 @@ func LineSaleStockIn(c *gin.Context) {
 
 	}
 
-	c.JSON(http.StatusOK,gin.H{"message":"Items saved successfully"})
+	session.Set("message","Items saved successfully")
+	session.Save()
+
+	c.JSON(http.StatusOK,nil)
 }

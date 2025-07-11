@@ -3,7 +3,9 @@ package routes
 import (
 	"net/http"
 	"retialops/controller"
+	"retialops/linesale"
 	"retialops/middleware"
+	"retialops/vehicles"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,9 +29,16 @@ func GetUrl(router *gin.Engine){
 	router.GET("/lineSale-items",middleware.AuthMiddleware(),middleware.NoCaches(),controller.LineSalesItemsPage)
 	router.GET("/items",controller.GetItems)
 	router.POST("/line-sale-items/save",middleware.AuthMiddleware(),middleware.NoCaches(),controller.SaveLineSaleItem)
+	router.GET("/lineSale-stockout",middleware.AuthMiddleware(),middleware.NoCaches(),linesale.LineSaleStockOutPage)
+	router.GET("/smrd/vehicles-list",middleware.AuthMiddleware(),middleware.NoCaches(),vehicles.VehicleList)
+	router.GET("/smrd/linesale-stockout",middleware.AuthMiddleware(),middleware.NoCaches(),linesale.StockOutItems)
+	router.POST("/smrd/linesale-stockout",middleware.AuthMiddleware(),middleware.NoCaches(),linesale.StockOutUpdate)
 	router.GET("/line-sale/edit/:id",middleware.AuthMiddleware(),middleware.NoCaches(),controller.EditLineSaleItemPage)
 	router.POST("/linesale/update-item/:id",middleware.AuthMiddleware(),middleware.NoCaches(),controller.EditLineSale)
 	router.GET("/lineSale-closing",middleware.AuthMiddleware(),middleware.NoCaches(),middleware.CheckLineSaleClosing(),controller.LineSaleClosingPage)
 	router.POST("/linesale/closing",middleware.AuthMiddleware(),middleware.NoCaches(),controller.LineSaleClosing)
-
+	
+	// Vehicles
+	router.GET("/smrd/vehicles",middleware.AuthMiddleware(),middleware.NoCaches(),vehicles.VehiclesPage)
+	router.POST("/smrd/add-vehicle",middleware.AuthMiddleware(),middleware.NoCaches(),vehicles.AddVehicle)
 }
