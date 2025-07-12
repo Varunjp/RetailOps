@@ -78,6 +78,7 @@ type LineSale struct{
 	Created_at 		time.Time
 	Status 			bool 									
 	Product			Product 				`gorm:"constraint:ONDELETE:CASCADE;foreignKey:ProductID"`
+	VyaparSale 		VyaparSale				`gorm:"foreignKey:SaleID;constraint:OnDelete:CASCADE"`
 	Deleted_at  	gorm.DeletedAt
 }
 
@@ -109,6 +110,13 @@ type LineSaleEdit struct{
 	LineSaleID 		uint 				`gorm:"not null"`
 	StockOut 		int 				
 	Created_at		time.Time
+}
+
+type VyaparSale struct {
+	ID 				uint 			`gorm:"primaryKey;autoIncrement"`
+	SaleID 			uint 			`gorm:"index"`
+	StockOut 		int 			
+	Created_at  	time.Time 
 }
 
 type Batch struct{

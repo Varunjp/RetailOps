@@ -23,7 +23,7 @@ func StockOutItems(c *gin.Context){
 	var Items []responsemodel.LineSaleStockOut
 	vehicle := c.Query("vehicle_id")
 	today := time.Now().Format("2006-01-02")
-	query := db.Db.Model(&models.LineSale{}).Where("vehicle = ? AND created_at BETWEEN ? AND ? ",vehicle,today+" 00:00:00",today+" 23:59:59")
+	query := db.Db.Model(&models.LineSale{}).Where("vehicle = ? AND created_at BETWEEN ? AND ? AND status = ?",vehicle,today+" 00:00:00",today+" 23:59:59",true)
 
 	if err := query.Find(&Itemslist).Error; err != nil{
 		log.Println("Error while getting data for vehicle :",err)
@@ -36,6 +36,7 @@ func StockOutItems(c *gin.Context){
 			ID: item.ID,
 			Name: item.ItemName,
 			StockIn: item.StockIn,
+			StockOut: item.StockOut,
 		})
 	}
 

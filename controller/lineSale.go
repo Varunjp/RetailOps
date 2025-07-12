@@ -166,8 +166,6 @@ func EditLineSaleItemPage(c *gin.Context){
 		"Name":LineSaleItem.ItemName,
 		"Rate":LineSaleItem.Rate,
 		"StockIn":LineSaleItem.StockIn,
-		"StockOut":LineSaleItem.StockOut,
-		"Damage":LineSaleItem.Damage,
 		"Status":LineSaleItem.Status,
 	})
 
@@ -185,22 +183,10 @@ func EditLineSale(c *gin.Context){
 		return 
 	}
 
-	StockOutStr := c.PostForm("stock_out")
-	stockOut,_ := strconv.Atoi(StockOutStr)
+	StockinStr := c.PostForm("stock_in")
+	stockin,_ := strconv.Atoi(StockinStr)
 
-	tempItem := models.LineSaleEdit{
-		LineSaleID: LineSaleItem.ID,
-		StockOut: stockOut,
-	}
-
-	LineSaleItem.Status = false
-
-	if err := db.Db.Create(&tempItem).Error; err != nil{
-		session.Set("lineError","Failed to send request for edit")
-		session.Save()
-		c.Redirect(http.StatusSeeOther,"/lineSale-items")
-		return 
-	}
+	LineSaleItem.StockIn = stockin
 
 	if err := db.Db.Save(&LineSaleItem).Error; err != nil{
 		session.Set("lineError","Failed to send request for edit")

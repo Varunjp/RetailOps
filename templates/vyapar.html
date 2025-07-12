@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Line Sale Stock Out</title>
+    <title>Vyapar Update</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         // Check system color scheme on load
@@ -280,6 +280,16 @@
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
+        #errorModal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900">
@@ -410,7 +420,7 @@
             <div class="bg-white rounded-lg shadow-md overflow-hidden mt-4">
 
                 <div class="px-6 py-4 border-b border-gray-200">
-                    <h2 class="text-lg font-medium text-gray-800">Line sale StockOut</h2>
+                    <h2 class="text-lg font-medium text-gray-800">Vyapar Update</h2>
                 </div>
 
                 {{if .error}}
@@ -456,18 +466,17 @@
                     </div>
 
                     <div class="form-container" id="form-container" style="display:none;">
-                        <div class="form-header">Inventory Items</div>
+                        <div class="form-header">Vyapar Items</div>
                         <div class="form-row">
                         <span>Item Name</span>
-                        <span>Stock In</span>
-                        <span>Stock Out</span>
+                        <span>Total Sale</span>
                         </div>
 
                         <div id="inventory-items">
                         <!-- Items loaded dynamically -->
                         </div>
 
-                        <button id="submit-btn" class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 shadow-lg shadow-blue-500/50 dark:shadow-lg dark:shadow-blue-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 ">Submit Stock Update</button>
+                        <button id="submit-btn" class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 shadow-lg shadow-blue-500/50 dark:shadow-lg dark:shadow-blue-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 ">Submit Vyapar Update</button>
                         <div class="error" id="form-error" style="display:none;">Please confirm all fields before submit</div>
                     </div>
                     
@@ -475,7 +484,18 @@
             </div>
         </div>
 
-        <div class="modal" id="confirmation-modal">
+        <div id="errorModal">
+            <div style="background:white; padding:20px; border-radius:8px; max-width:400px; width:90%; margin:auto;">
+                <h2 class="text-4xl font-bold text-gray-900 m-2">Stock Mismatch</h2>
+                <div id="modal-body">
+                    <!-- populated dynamically -->
+                </div>
+                <button id="modal-close-btn" style="margin-top:20px;">Close</button>
+            </div>
+        </div>
+
+
+        <!-- <div class="modal" id="confirmation-modal">
             <div class="modal-content">
                 <div class="modal-header">Confirm Submission</div>
                 <div class="modal-body" id="confirmation-content">
@@ -486,7 +506,7 @@
                     <button class="modal-btn confirm" id="confirm-btn">Confirm</button>
                 </div>
             </div>
-        </div>
+        </div> -->
 
     </div>
 
@@ -577,8 +597,7 @@
                     row.dataset.itemId = item.id;
                     row.innerHTML = `
                         <span>${item.name}</span>
-                        <input type="number" name="stock_in_${item.id}" value="${item.stockin}" placeholder="0" readonly>
-                        <input type="number" name="stock_out_${item.id}" value="${item.stockout}" placeholder="0">
+                        <input type="number" name="stock_out_${item.id}"  placeholder="0">
                     `;
                     inventoryItems.appendChild(row);
                     });
@@ -591,30 +610,26 @@
 
 
             document.getElementById('submit-btn').addEventListener('click', () => {
-                const vehicleId = vehicleSelect.value;
-                if (!vehicleId) {
-                vehicleError.style.display = 'block';
-                return;
-                }
 
                 const data = {
-                    vehicle_id: vehicleId,
                     stock_updates: []
                 };
 
                 inventoryItems.querySelectorAll('.form-row').forEach(row => {
                     const itemId = row.dataset.itemId; // 👈 get hidden id
-                    const [nameSpan, stockInInput, stockOutInput] = row.children;
+                    const [nameSpan, stockOutInput] = row.children;
 
                     data.stock_updates.push({
                         item_id: itemId,
                         item_name: nameSpan.textContent,
-                        stock_in: parseInt(stockInInput.value) || 0,
                         stock_out: parseInt(stockOutInput.value) || 0
                     });
                 });
 
-                fetch('/smrd/linesale-stockout', {
+                //delete
+                console.log(data)
+
+                fetch('/smrd/linesale-vyapar', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(data)
@@ -622,9 +637,43 @@
                 .then(res => {
                 if (res.ok) {
                     alert('Stock updated successfully');
-                    window.location.href = '/lineSale-stockout'
+                    window.location.href = '/lineSale-vypar'
                 } else {
-                    formError.style.display = 'block';
+                    return res.json().then(errorData => {
+                        // populate modal with mismatched items
+                        const modalBody = document.getElementById('modal-body');
+                        modalBody.innerHTML = '';
+
+                        if (errorData.mismatches && errorData.mismatches.length > 0) {
+                            const list = document.createElement('ul');
+                            errorData.mismatches.forEach(item => {
+                                const li = document.createElement('li');
+                                li.innerHTML = `
+                                    <span style="font-weight: bold;">${item.item_name}</span>: 
+                                    difference of 
+                                    <span style="color: red; font-weight: bold;">${item.difference}</span>, 
+                                    Vyapar is 
+                                    <span style="color: blue; font-weight: bold;">${item.status}</span>
+                                `;
+                                list.appendChild(li);
+                            });
+                            modalBody.appendChild(list);
+                        }else if (errorData.error){
+                            const errorBox = document.createElement('div');
+                            errorBox.style.backgroundColor = '#f8d7da';
+                            errorBox.style.color = '#721c24';
+                            errorBox.style.border = '1px solid #f5c6cb';
+                            errorBox.style.padding = '10px';
+                            errorBox.style.borderRadius = '4px';
+                            errorBox.textContent = `Error: ${errorData.error}`;
+                            modalBody.appendChild(errorBox);
+                        }
+                        else {
+                            modalBody.textContent = 'Unknown error occurred.';
+                        }
+
+                        document.getElementById('errorModal').style.display = 'flex';
+                    });
                 }
                 })
                 .catch(err => {
@@ -633,6 +682,10 @@
                 });
             });
 
+        });
+
+        document.getElementById('modal-close-btn').addEventListener('click', function (){
+            document.getElementById('errorModal').style.display = 'none';
         });
 
     </script>
