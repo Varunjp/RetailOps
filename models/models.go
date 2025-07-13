@@ -103,7 +103,7 @@ type LineSaleExpenses struct{
 	Type 			string
 	Amount 			float64
 	Created_at 		time.Time
-	LineSale		LineSale				`gorm:"constraint:ONDELETE:CASCADE;foreignKey:LineSaleID"`
+	LineSale		LineSaleClosing				`gorm:"constraint:ONDELETE:CASCADE;foreignKey:LineSaleID"`
 }
 
 type LineSaleEdit struct{
