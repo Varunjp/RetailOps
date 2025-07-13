@@ -35,12 +35,13 @@ func GetUrl(router *gin.Engine){
 	router.POST("/smrd/linesale-stockout",middleware.AuthMiddleware(),middleware.NoCaches(),linesale.StockOutUpdate)
 	router.GET("/line-sale/edit/:id",middleware.AuthMiddleware(),middleware.NoCaches(),controller.EditLineSaleItemPage)
 	router.POST("/linesale/update-item/:id",middleware.AuthMiddleware(),middleware.NoCaches(),controller.EditLineSale)
-	router.GET("/lineSale-closing",middleware.AuthMiddleware(),middleware.NoCaches(),middleware.CheckLineSaleClosing(),controller.LineSaleClosingPage)
-	router.POST("/linesale/closing",middleware.AuthMiddleware(),middleware.NoCaches(),controller.LineSaleClosing)
 	router.GET("/lineSale-vypar",middleware.AuthMiddleware(),middleware.NoCaches(),linesale.VyparPage)
 	router.POST("/smrd/linesale-vyapar",middleware.AuthMiddleware(),middleware.NoCaches(),linesale.VyaparUpdate)
+	router.GET("lineSale-sales",middleware.AuthMiddleware(),middleware.NoCaches(),middleware.CheckLineSaleClosing(),linesale.LinesaleSalesPage)
+	router.GET("/linesale/totalamount",middleware.AuthMiddleware(),middleware.NoCaches(),linesale.LineSaleTotal)
+	router.POST("/linesale/sales",middleware.AuthMiddleware(),middleware.NoCaches(),linesale.LineSaleSubmit)
 	
 	// Vehicles
-	router.GET("/smrd/vehicles",middleware.AuthMiddleware(),middleware.NoCaches(),vehicles.VehiclesPage)
-	router.POST("/smrd/add-vehicle",middleware.AuthMiddleware(),middleware.NoCaches(),vehicles.AddVehicle)
+	router.GET("/smrd/vehicles",middleware.AuthMiddleware(),middleware.AuthSuperUser(),middleware.NoCaches(),vehicles.VehiclesPage)
+	router.POST("/smrd/add-vehicle",middleware.AuthMiddleware(),middleware.AuthSuperUser(),middleware.NoCaches(),vehicles.AddVehicle)
 }

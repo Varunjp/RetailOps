@@ -87,6 +87,7 @@ type LineSaleClosing struct {
 	EmpID 			string 					`gorm:"not null"`
 	SaleAmount		float64
 	Discount 		float64
+	Vehicle 		string 
 	ActualSale 		float64
 	Cash 			float64
 	AccountPayment	float64

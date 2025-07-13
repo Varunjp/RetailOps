@@ -3,6 +3,7 @@ package responsemodel
 type LineSaleClosing struct {
 	ID          uint
 	Date        string
+	Vehicle     string
 	Sale_amount float64
 	Discount    float64
 	Actual_sale float64

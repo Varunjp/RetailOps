@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"retialops/helper"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
@@ -49,6 +50,22 @@ func AuthMiddleware() gin.HandlerFunc{
 
 		if err != nil || !tokenres.Valid{
 			c.HTML(http.StatusUnauthorized,"login.html",gin.H{"error":"Token expired please login again"})
+			c.Abort()
+			return 
+		}
+
+		c.Next()
+	}
+}
+
+func AuthSuperUser()gin.HandlerFunc{
+	return func(c *gin.Context) {
+		tokenStr,_ := c.Cookie("JWT-User")
+		_,superUser,_ := helper.DecodeJWT(tokenStr)
+		refer := c.Request.Referer()
+
+		if !superUser {
+			c.Redirect(http.StatusSeeOther,refer)
 			c.Abort()
 			return 
 		}
