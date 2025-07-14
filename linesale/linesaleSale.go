@@ -172,6 +172,13 @@ func LineSaleSubmit(c *gin.Context){
 
 	balanceErr := helper.UpdateCreditBalance("lineSale",actual_sale,(cash+account))
 
+	if sale_amount <= 0 || actual_sale <= 0 || cash < 0 || account < 0 {
+		session.Set("saleError","Values cannot be zero or less, Please try again later")
+		session.Save()
+		c.Redirect(http.StatusSeeOther,"/lineSale-sales")
+		return 
+	}
+
 	if balanceErr != nil{
 		session.Set("saleError","Failed to update credit balance, Please try again later")
 		session.Save()

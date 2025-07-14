@@ -71,7 +71,7 @@ func LineSaleStockIn(c *gin.Context) {
 			ItemName: product.ItemName,
 			Rate: item.Rate,
 			StockIn: int(item.StockIn),
-			Status: true,
+			Status: false,
 			Created_at: time.Now(),
 		}
 

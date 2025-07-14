@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Line Sale Closing</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --secondary: #2ecc71;
+            --danger: #e74c3c;
+            --dark: #2c3e50;
+            --light-gray: #ecf0f1;
+            --border-color: #dfe6e9;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        h1 {
+            color: var(--dark);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .vehicle-selector {
+            margin: 25px auto;
+            max-width: 500px;
+        }
+        
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            background-color: white;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .dashboard {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .table-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        
+        h2 {
+            color: var(--dark);
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        
+        h2::before {
+            content: "";
+            display: inline-block;
+            width: 5px;
+            height: 20px;
+            background-color: var(--primary);
+            margin-right: 10px;
+            border-radius: 3px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        th {
+            background-color: var(--primary);
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 500;
+            position: sticky;
+            top: 0;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        tr:hover {
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+        
+        .text-success {
+            color: var(--secondary);
+            font-weight: 500;
+        }
+        
+        .text-danger {
+            color: var(--danger);
+            font-weight: 500;
+        }
+        
+        .highlight {
+            font-weight: 600;
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+        
+        .stock-balance {
+            font-weight: 500;
+        }
+        
+        .in-stock {
+            color: var(--secondary);
+        }
+        
+        .low-stock {
+            color: var(--danger);
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            
+            .table-container {
+                padding: 15px;
+            }
+            
+            th, td {
+                padding: 10px 12px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Line Sale Closing</h1>
+            <p>Select a vehicle to view inventory, revenue, and expense details</p>
+        </header>
+        
+        <div class="vehicle-selector">
+            <select id="vehicleSelect" onchange="loadVehicleData()">
+                <option value="">-- Select a Vehicle --</option>
+                {{ range .Vehicle}}
+                <option value="{{ .ID}}">{{ .Name}}({{.License}})</option>
+                {{ end }}
+            </select>
+        </div>
+        
+        <div id="dashboard" class="dashboard">
+            <!-- Line-Sale Items Table -->
+            <div class="table-container">
+                <h2>Line-Sale Items</h2>
+                <table id="lineSaleTable">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Stock In</th>
+                            <th>Stock Out</th>
+                            <th>Rate (USD)</th>
+                            <th>Balance</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            
+            <!-- Revenue Summary Table -->
+            <div class="table-container">
+                <h2>Revenue Summary</h2>
+                <table id="revenueTable">
+                    <thead>
+                        <tr>
+                            <th>Total Amount (USD)</th>
+                            <th>Discount (USD)</th>
+                            <th>Actual Sale (USD)</th>
+                            <th>Cash (USD)</th>
+                            <th>Account (USD)</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            
+            <!-- Expense Table -->
+            <div class="table-container">
+                <h2>Expense Details</h2>
+                <table id="expenseTable">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Category</th>
+                            <th>Amount (USD)</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Complete vehicle data with realistic values
+        const vehicleData = {
+            truck1: {
+                lineSaleItems: [
+                    { item: "Synthetic Engine Oil 10W-40", stockIn: 120, stockOut: 85, rate: 89.99 },
+                    { item: "Air Filter Heavy Duty", stockIn: 45, stockOut: 32, rate: 125.50 },
+                    { item: "Brake Pads Set (Front)", stockIn: 60, stockOut: 48, rate: 189.99 },
+                    { item: "Fuel Filter", stockIn: 90, stockOut: 73, rate: 95.75 },
+                    { item: "Turbocharger", stockIn: 8, stockOut: 3, rate: 2499.00 }
+                ],
+                revenue: {
+                    totalAmount: 45890.75,
+                    discount: 1250.50,
+                    actualSale: 44640.25,
+                    cash: 32540.25,
+                    account: 12100.00
+                },
+                expenses: [
+                    { item: "Routine Maintenance", category: "Service", amount: 2450.50, date: "2023-10-15" },
+                    { item: "Diesel Fuel", category: "Fuel", amount: 12540.75, date: "2023-10-15" },
+                    { item: "Commercial Insurance", category: "Insurance", amount: 3750.00, date: "2023-10-01" },
+                    { item: "Driver Salary", category: "Payroll", amount: 4800.00, date: "2023-10-05" },
+                    { item: "Tire Replacement", category: "Parts", amount: 3650.00, date: "2023-10-10" }
+                ]
+            },
+            truck2: {
+                lineSaleItems: [
+                    { item: "Synthetic Engine Oil 15W-40", stockIn: 110, stockOut: 75, rate: 95.99 },
+                    { item: "Air Filter Heavy Duty", stockIn: 50, stockOut: 40, rate: 139.50 },
+                    { item: "Brake Pads Set (Front)", stockIn: 55, stockOut: 42, rate: 199.99 },
+                    { item: "Fuel Filter", stockIn: 85, stockOut: 70, rate: 105.75 },
+                    { item: "Turbocharger", stockIn: 6, stockOut: 2, rate: 2799.00 }
+                ],
+                revenue: {
+                    totalAmount: 52570.25,
+                    discount: 1850.00,
+                    actualSale: 50720.25,
+                    cash: 37020.25,
+                    account: 13700.00
+                },
+                expenses: [
+                    { item: "Routine Maintenance", category: "Service", amount: 2850.50, date: "2023-10-12" },
+                    { item: "Diesel Fuel", category: "Fuel", amount: 14250.75, date: "2023-10-12" },
+                    { item: "Commercial Insurance", category: "Insurance", amount: 3950.00, date: "2023-10-01" },
+                    { item: "Driver Salary", category: "Payroll", amount: 5000.00, date: "2023-10-05" },
+                    { item: "Suspension Repair", category: "Service", amount: 4250.00, date: "2023-10-08" }
+                ]
+            },
+            van: {
+                lineSaleItems: [
+                    { item: "Synthetic Engine Oil 5W-30", stockIn: 85, stockOut: 60, rate: 65.99 },
+                    { item: "Air Filter Standard", stockIn: 75, stockOut: 52, rate: 49.50 },
+                    { item: "Brake Pads Set", stockIn: 80, stockOut: 65, rate: 129.99 },
+                    { item: "Fuel Filter", stockIn: 95, stockOut: 80, rate: 79.75 },
+                    { item: "Spark Plugs (Set of 4)", stockIn: 120, stockOut: 105, rate: 45.00 }
+                ],
+                revenue: {
+                    totalAmount: 28570.25,
+                    discount: 850.25,
+                    actualSale: 27720.00,
+                    cash: 19570.25,
+                    account: 8149.75
+                },
+                expenses: [
+                    { item: "Routine Maintenance", category: "Service", amount: 1450.50, date: "2023-10-18" },
+                    { item: "Gasoline Fuel", category: "Fuel", amount: 8540.75, date: "2023-10-18" },
+                    { item: "Commercial Insurance", category: "Insurance", amount: 2750.00, date: "2023-10-01" },
+                    { item: "Driver Salary", category: "Payroll", amount: 3800.00, date: "2023-10-05" },
+                    { item: "Transmission Fluid", category: "Parts", amount: 220.00, date: "2023-10-10" }
+                ]
+            },
+            suv: {
+                lineSaleItems: [
+                    { item: "Synthetic Engine Oil 0W-20", stockIn: 60, stockOut: 40, rate: 55.99 },
+                    { item: "Air Filter Premium", stockIn: 50, stockOut: 32, rate: 39.50 },
+                    { item: "Brake Pads Set", stockIn: 45, stockOut: 30, rate: 119.99 },
+                    { item: "Cabin Air Filter", stockIn: 65, stockOut: 50, rate: 29.75 },
+                    { item: "Spark Plugs (Set of 4)", stockIn: 80, stockOut: 65, rate: 49.00 }
+                ],
+                revenue: {
+                    totalAmount: 20570.25,
+                    discount: 650.25,
+                    actualSale: 19920.00,
+                    cash: 15570.25,
+                    account: 4349.75
+                },
+                expenses: [
+                    { item: "Routine Maintenance", category: "Service", amount: 950.50, date: "2023-10-20" },
+                    { item: "Gasoline Fuel", category: "Fuel", amount: 6540.75, date: "2023-10-20" },
+                    { item: "Commercial Insurance", category: "Insurance", amount: 2250.00, date: "2023-10-01" },
+                    { item: "Driver Salary", category: "Payroll", amount: 2800.00, date: "2023-10-05" },
+                    { item: "Tire Rotation", category: "Service", amount: 80.00, date: "2023-10-15" }
+                ]
+            }
+        };
+
+        function loadVehicleData() {
+            const selectElement = document.getElementById('vehicleSelect');
+            const selectedValue = selectElement.value;
+            const dashboardElement = document.getElementById('dashboard');
+            
+            if (!selectedValue) {
+                dashboardElement.style.display = 'none';
+                return;
+            }
+            
+            dashboardElement.style.display = 'block';
+            
+            // Get the selected vehicle data
+            const vehicle = vehicleData[selectedValue];
+            
+            // Populate Line-Sale Items Table
+            populateLineSaleTable(vehicle.lineSaleItems);
+            
+            // Populate Revenue Table
+            populateRevenueTable(vehicle.revenue);
+            
+            // Populate Expense Table
+            populateExpenseTable(vehicle.expenses);
+        }
+        
+        function populateLineSaleTable(items) {
+            const tbody = document.querySelector('#lineSaleTable tbody');
+            tbody.innerHTML = '';
+            
+            items.forEach(item => {
+                const balance = item.stockIn - item.stockOut;
+                const value = (balance * item.rate).toFixed(2);
+                const isLowStock = (balance / item.stockIn < 0.25);
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.item}</td>
+                    <td>${item.stockIn}</td>
+                    <td>${item.stockOut}</td>
+                    <td>$${item.rate.toFixed(2)}</td>
+                    <td class="stock-balance ${isLowStock ? 'low-stock' : 'in-stock'}">${balance}</td>
+                    <td>$${value}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        function populateRevenueTable(revenue) {
+            const tbody = document.querySelector('#revenueTable tbody');
+            tbody.innerHTML = '';
+            
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="highlight">$${revenue.totalAmount.toFixed(2)}</td>
+                <td class="text-danger">-$${revenue.discount.toFixed(2)}</td>
+                <td class="highlight text-success">$${revenue.actualSale.toFixed(2)}</td>
+                <td>$${revenue.cash.toFixed(2)}</td>
+                <td>$${revenue.account.toFixed(2)}</td>
+            `;
+            tbody.appendChild(tr);
+        }
+        
+        function populateExpenseTable(expenses) {
+            const tbody = document.querySelector('#expenseTable tbody');
+            tbody.innerHTML = '';
+            let total = 0;
+            
+            expenses.forEach(expense => {
+                total += expense.amount;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${expense.item}</td>
+                    <td>${expense.category}</td>
+                    <td class="text-danger">$${expense.amount.toFixed(2)}</td>
+                    <td>${expense.date}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            // Add total row
+            const tr = document.createElement('tr');
+            tr.className = 'highlight';
+            tr.innerHTML = `
+                <td colspan="2"><strong>Total Expenses</strong></td>
+                <td class="text-danger">$${total.toFixed(2)}</td>
+                <td></td>
+            `;
+            tbody.appendChild(tr);
+        }
+    </script>
+</body>
+</html>

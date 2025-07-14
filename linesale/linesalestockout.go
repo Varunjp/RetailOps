@@ -23,7 +23,7 @@ func StockOutItems(c *gin.Context){
 	var Items []responsemodel.LineSaleStockOut
 	vehicle := c.Query("vehicle_id")
 	today := time.Now().Format("2006-01-02")
-	query := db.Db.Model(&models.LineSale{}).Where("vehicle = ? AND created_at BETWEEN ? AND ? AND status = ?",vehicle,today+" 00:00:00",today+" 23:59:59",true)
+	query := db.Db.Model(&models.LineSale{}).Where("vehicle = ? AND created_at BETWEEN ? AND ? AND status = ?",vehicle,today+" 00:00:00",today+" 23:59:59",false)
 
 	if err := query.Find(&Itemslist).Error; err != nil{
 		log.Println("Error while getting data for vehicle :",err)
@@ -67,6 +67,7 @@ func StockOutUpdate(c *gin.Context){
 		}
 
 		linesale.StockOut = item.StockOut
+		linesale.Status = true 
 		if err := db.Db.Save(&linesale).Error; err !=nil{
 			log.Println("Failed to save update :",err)
 			c.JSON(http.StatusInternalServerError,gin.H{"error":"Could not update item, please try again later"})

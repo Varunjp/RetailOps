@@ -34,6 +34,32 @@ func VyparPage(c *gin.Context){
 	})
 }
 
+// provide items for selected vehicles
+func VyaparStockOut(c *gin.Context){
+	var Itemslist []models.LineSale
+	var Items []responsemodel.LineSaleStockOut
+	vehicle := c.Query("vehicle_id")
+	today := time.Now().Format("2006-01-02")
+	query := db.Db.Model(&models.LineSale{}).Where("vehicle = ? AND created_at BETWEEN ? AND ? AND status = ?",vehicle,today+" 00:00:00",today+" 23:59:59",true)
+
+	if err := query.Find(&Itemslist).Error; err != nil{
+		log.Println("Error while getting data for vehicle :",err)
+		c.JSON(http.StatusInternalServerError,gin.H{"error":"Could not get items, please try again later"})
+		return 
+	}
+
+	for _,item := range Itemslist{
+		Items = append(Items, responsemodel.LineSaleStockOut{
+			ID: item.ID,
+			Name: item.ItemName,
+			StockIn: item.StockIn,
+			StockOut: item.StockOut,
+		})
+	}
+
+	c.JSON(http.StatusOK,Items)
+}
+
 func VyaparUpdate(c *gin.Context){
 	var vypReq responsemodel.VyaparUpdateRequest
 	var vypResp []responsemodel.VyaparResponse
@@ -103,17 +129,10 @@ func VyaparUpdate(c *gin.Context){
 			return 
 		}
 
-		linesale.Status = false
 		vypSale := models.VyaparSale{
 			SaleID: linesale.ID,
 			StockOut: item.StockOut,
 			Created_at: time.Now(),
-		}
-
-		if err := db.Db.Save(&linesale).Error; err != nil{
-			log.Println("Falied to update sale item :",err)
-			c.JSON(http.StatusInternalServerError,gin.H{"error":"Could not update item, please try again later"})
-			return 
 		}
 
 		if err := db.Db.Create(&vypSale).Error; err != nil{

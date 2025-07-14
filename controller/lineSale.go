@@ -22,7 +22,8 @@ func LineSalesItemsPage(c *gin.Context){
 	session := sessions.Default(c)
 	lineError := session.Get("lineError")
 	message := session.Get("message")
-
+	tokenStr,_ := c.Cookie("JWT-User")
+	_,todayStatus := helper.LineSaleConditions(tokenStr)
 	// get vehicle details
 	var Vehicle []models.Vehicle
 
@@ -112,6 +113,7 @@ func LineSalesItemsPage(c *gin.Context){
 		"error":lineError,
 		"message":message,
 		"Vehicle":Vehicle,
+		"todayStatus":todayStatus,
 	})
 }
 

@@ -29,7 +29,7 @@ func ExpensePerVehicle(c *gin.Context){
 	vID := c.Query("vehicle_id")
 	today := time.Now().Format("2006-01-02")
 
-	if err := db.Db.Where("vehicle = ? AND created_at BETWEEN ? AND ? ",vID,today+" 00:00:00",today+" 23:59:59").First(&Sale).Error; err != nil{
+	if err := db.Db.Where("status = ? AND vehicle = ? AND created_at BETWEEN ? AND ? ",false,vID,today+" 00:00:00",today+" 23:59:59").First(&Sale).Error; err != nil{
 		log.Println("Failed to fetch amount :",err)
 		c.JSON(http.StatusInternalServerError,gin.H{"error":"Failed to fetch today sale details,please try again later"})
 		return 
@@ -79,7 +79,15 @@ func ExpenseItems(c *gin.Context){
 		}
 	}
 
-	c.Redirect(http.StatusOK,"lineSale-closing")
+	Sale.Status = true
+
+	if err := db.Db.Save(&Sale).Error; err != nil{
+		log.Println("Failed to save sales update :",err)
+		c.JSON(http.StatusInternalServerError,gin.H{"error":"Failed to save update status in DB"})
+		return 
+	}
+
+	c.Redirect(http.StatusFound,"/lineSale-closing")
 }
 
 

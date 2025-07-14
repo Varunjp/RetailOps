@@ -585,7 +585,7 @@
 
                 loading.style.display = 'block';
 
-                fetch(`/smrd/linesale-stockout?vehicle_id=${vehicleId}`)
+                fetch(`/smrd/vyapar-stockout?vehicle_id=${vehicleId}`)
                 .then(res => res.json())
                 .then(items => {
                     loading.style.display = 'none';
