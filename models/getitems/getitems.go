@@ -13,3 +13,13 @@ type InventoryRequest struct {
 	} `json:"transaction"`
 	Items []inventoryItem `json:"items"`
 }
+
+type expenseItem struct {
+	Item   string  `json:"item"`
+	Amount float64 `json:"amount"`
+}
+
+type ExpenseRequest struct {
+	Transaction []expenseItem `json:"expenses"`
+	VehicleID   string        `json:"vehicleId"`
+}

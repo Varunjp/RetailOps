@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Line sale Expense</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Check system color scheme on load
+        function updateTheme() {
+            if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+        
+        // Initial check
+        updateTheme();
+        
+        // Listen for system color scheme changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateTheme);
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .denomination-input:focus {
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+        }
+        .rounded-modal {
+            border-radius: 0.75rem;
+        }
+        .receipt-row {
+            transition: all 0.2s ease;
+        }
+        .receipt-row:hover {
+            background-color: #f0f9ff;
+        }
+        .sidebar {
+            transition: all 0.3s;
+        }
+        .sidebar.collapsed {
+            width: 70px;
+        }
+        .sidebar.collapsed .nav-text {
+            display: none;
+        }
+        .sidebar.collapsed .logo-text {
+            display: none;
+        }
+        .sidebar.collapsed .nav-item {
+            justify-content: center;
+        }
+        .content {
+            transition: all 0.3s;
+        }
+        .content.expanded {
+            margin-left: 70px;
+        }
+        .dashboard-card {
+            transition: all 0.3s;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="sidebar bg-blue-800 text-white w-64 flex flex-col">
+            <!-- Logo -->
+            <div class="p-4 flex items-center">
+                <div class="w-8 h-8 bg-white rounded flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-800" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4 a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <span class="logo-text ml-2 text-xl font-bold">SalesDash</span>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="flex-1 mt-6">
+                <ul>
+                    <li class="nav-item mb-2">
+                        <a href="#" class="flex items-center p-3 hover:bg-blue-700 rounded-r-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                            </svg>
+                            <span class="nav-text ml-3">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a href="#" class="flex items-center p-3 hover:bg-blue-700 rounded-r-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="nav-text ml-3">Counter Sales</span>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <button id="lineSalesBtn" class="w-full flex items-center p-3 bg-blue-700 rounded-r-full focus:outline-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="nav-text ml-3 flex-1 text-left">Line Sales</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" id="lineSalesArrow" class="h-4 w-4 transform transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.25 4.25a.75.75 0 01-1.06 0L5.25 8.27a.75.75 0 01-.02-1.06z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        <ul id="lineSalesMenu" class="ml-8 mt-2 hidden">
+                            <li class="mb-1">
+                                <a href="/lineSale-items" class="flex items-center p-2 hover:bg-blue-700 rounded-r-full">
+                                    <span class="ml-2">Stock IN</span>
+                                </a>
+                            </li>
+                            <li class="mb-1">
+                                <a href="/lineSale-stockout" class="flex items-center p-2 hover:bg-blue-700 rounded-r-full">
+                                    <span class="ml-2">Stock Out</span>
+                                </a>
+                            </li>
+                            <li class="mb-1">
+                                <a href="/lineSale-vypar" class="flex items-center p-2 hover:bg-blue-700 rounded-r-full">
+                                    <span class="ml-2">Vyapar Stock</span>
+                                </a>
+                            </li>
+                            <li class="mb-1">
+                                <a href="/lineSale-sales" class="flex items-center p-2 hover:bg-blue-700 rounded-r-full">
+                                    <span class="ml-2">Sales</span>
+                                </a>
+                            </li>
+                            <li class="mb-1">
+                                <a href="/lineSale-expense" class="flex items-center p-2 hover:bg-blue-700 rounded-r-full">
+                                    <span class="ml-2">Expenses</span>
+                                </a>
+                            </li>
+                            <li class="mb-1">
+                                <a href="/lineSale-closing" class="flex items-center p-2 hover:bg-blue-700 rounded-r-full">
+                                    <span class="ml-2">Line Sales Closing</span>
+                                </a>
+                            </li>
+                            <!-- Add more tabs here -->
+                        </ul>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a href="#" class="flex items-center p-3 hover:bg-blue-700 rounded-r-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="nav-text ml-3">Attendance</span>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a href="/user/products" class="flex items-center p-3 hover:bg-blue-700 rounded-r-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="nav-text ml-3">Products</span>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a href="/smrd/vehicles" class="flex items-center p-3 hover:bg-blue-700 rounded-r-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M3 3a1 1 0 00-1 1v10a2 2 0 002 2h1a2 2 0 004 0h4a2 2 0 004 0h1a1 1 0 001-1v-4a1 1 0 00-.293-.707l-3-3A1 1 0 0014 7h-3V4a1 1 0 00-1-1H3zm10 5h1.586L17 10.414V12h-4V8zM5 15a1 1 0 110-2 1 1 0 010 2zm10 0a1 1 0 110-2 1 1 0 010 2z"/>
+                            </svg>
+                            <span class="nav-text ml-3">Vehicles</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <!-- Collapse Button -->
+            <div class="p-4">
+                <button id="toggleSidebar" class="w-full flex items-center justify-center p-2 rounded-full bg-blue-700 hover:bg-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M15.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414zm-6 0a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 011.414 1.414L5.414 10l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="nav-text ml-2">Collapse</span>
+                </button>
+            </div>
+            <div class="p-4 mt-auto">
+                <button id="signoutBtn" class="w-full flex items-center justify-center p-2 rounded-full bg-red-600 hover:bg-red-700 text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="nav-text ml-2">Sign Out</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="content flex-1 overflow-auto p-6">
+
+                <div class="container mx-auto px-4 py-8">
+                    <!-- Header -->
+                    <div class="flex justify-between items-center mb-8 border-b pb-4">
+                        <h1 class="text-3xl font-bold text-gray-800 flex dark:text-white items-center">
+                    
+                            Line Sale Expense
+                        </h1>
+                        <div class="flex items-center space-x-2">
+                            <div id="current-time" class="text-sm text-gray-600"></div>
+                        </div>
+                    </div>
+
+                    <!-- Vehicle Selection -->
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                        <h2 class="text-xl font-semibold text-gray-800 mb    -4">Select Vehicle</h2>
+                        <div class="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-6">
+                            <div class="flex-1">
+                                <label for="vehicle-select" class="block text-sm font-medium text-gray-700 mb-1">Vehicle</label>
+                                <select id="vehicle-select" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="" disabled selected>Select a vehicle</option>
+                                    {{ range .Vehicle}}
+                                    <option value="{{ .ID }}">{{ .Name }}({{ .License}})</option>
+                                    {{ end }}
+                                </select>
+                            </div>
+                            <div class="flex items-end">
+                                <button id="load-vehicle" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                                    Load Vehicle Data
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Denomination Table -->
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-8" id="denomination-section" style="display: none;">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">Cash Denomination</h2>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Denomination</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Count</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200" id="denomination-body">
+                                    <tr class="receipt-row">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">500</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <input type="number" min="0" class="denomination-input w-20 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-1 count-input" value="0">
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 denomination-total">0.00</td>
+                                    </tr>
+                                    <tr class="receipt-row">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">200</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <input type="number" min="0" class="denomination-input w-20 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-1 count-input" value="0">
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 denomination-total">0.00</td>
+                                    </tr>
+                                    <tr class="receipt-row">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">100</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <input type="number" min="0" class="denomination-input w-20 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-1 count-input" value="0">
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 denomination-total">0.00</td>
+                                    </tr>
+                                    <tr class="receipt-row">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">50</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <input type="number" min="0" class="denomination-input w-20 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-1 count-input" value="0">
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 denomination-total">0.00</td>
+                                    </tr>
+                                    <tr class="receipt-row">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">20</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <input type="number" min="0" class="denomination-input w-20 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-1 count-input" value="0">
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 denomination-total">0.00</td>
+                                    </tr>
+                                    <tr class="receipt-row">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">10</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <input type="number" min="0" class="denomination-input w-20 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-1 count-input" value="0">
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 denomination-total">0.00</td>
+                                    </tr>
+                                    <tr class="receipt-row">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Coins</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <input type="number" min="0" class="denomination-input w-20 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-1 count-input" value="0">
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 denomination-total">0.00</td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="bg-blue-50">
+                                        <td colspan="2" class="px-6 py-3 text-right text-sm font-bold text-gray-700">Total Cash</td>
+                                        <td id="total-cash" class="px-6 py-3 text-left text-sm font-bold text-gray-700">0.00</td>
+                                        <input type="hidden" id="total-cash-value" value="0">
+                                        <input type="hidden" id="loaded-cash-total" value="{{.cash}}">
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Expense Form -->
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-8" id="expense-section" style="display: none;">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">Expenses</h2>
+                        <form id="expense-form">
+                            <div id="expense-rows">
+                                <!-- Expense rows will be added here -->
+                            </div>
+                            <input type="hidden" id="cash-loaded" value="{{.cash}}">
+                            <div class="flex justify-between items-center mt-4">
+                                <button type="button" id="add-expense" class="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 text-sm transition-colors">
+                                    Add Expense
+                                </button>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-700 mr-2">Total Expenses:</span>
+                                    <span id="expense-total" class="font-bold">0.00</span>
+                                </div>
+                            </div>
+                            <div class="mt-6 pt-4 border-t border-gray-200 flex justify-end">
+                                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                                    Submit
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Error Modal -->
+                    <div id="error-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                        <div class="bg-white rounded-modal p-6 max-w-md w-11/12">
+                            <div class="flex justify-between items-start mb-4">
+                                <h3 class="text-lg font-bold text-red-600">Cash Mismatch</h3>
+                            </div>
+                            <p id="error-message" class="text-gray-700 mb-6">There is a discrepancy between the cash on hand and the total expenses.</p>
+                            <div class="flex justify-end">
+                                <button id="close-modal" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+        </div>
+
+    </div>
+    
+
+    <script>
+
+        // Toggle Sidebar
+        document.getElementById('toggleSidebar').addEventListener('click', function() {
+            const sidebar = document.querySelector('.sidebar');
+            const content = document.querySelector('.content');
+            sidebar.classList.toggle('collapsed');
+            content.classList.toggle('expanded');
+        });
+
+        document.getElementById('lineSalesBtn').addEventListener('click', function(){
+            const menu = document.getElementById('lineSalesMenu');
+            const arrow = document.getElementById('lineSalesArrow');
+            menu.classList.toggle('hidden');
+            arrow.classList.toggle('rotate-180');
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const rows = document.querySelectorAll('.receipt-row');
+            const totalCashElem = document.getElementById('total-cash');
+            const totalCashValue = document.getElementById('total-cash-value');
+            const loadedCashTotal = document.getElementById('loaded-cash-total');
+
+            const expenseSection = document.getElementById('expense-section');
+            const expenseRowsContainer = document.getElementById('expense-rows');
+            const expenseTotalElem = document.getElementById('expense-total');
+
+            const expenseForm = document.getElementById('expense-form');
+            const errorModal = document.getElementById('error-modal');
+            const closeModalBtn = document.getElementById('close-modal');
+
+            const vehicleSelectBtn = document.getElementById('load-vehicle');
+
+            // 🔷 Denomination calculation
+            function recalculateDenominations() {
+                let grandTotal = 0;
+
+                rows.forEach(row => {
+                    const denominationText = row.querySelector('td:first-child').textContent.trim();
+                    const countInput = row.querySelector('.count-input');
+                    const count = parseInt(countInput.value) || 0;
+                    const rowTotalCell = row.querySelector('.denomination-total');
+
+                    let rowTotal = 0;
+
+                    if (denominationText.toLowerCase() === 'cash') {
+                        rowTotal = 1 * count;
+                    } else {
+                        const denomination = parseFloat(denominationText) || 0;
+                        rowTotal = denomination * count;
+                    }
+
+                    rowTotalCell.textContent = rowTotal.toFixed(2);
+                    grandTotal += rowTotal;
+                });
+
+                totalCashElem.textContent = grandTotal.toFixed(2);
+                totalCashValue.value = grandTotal;
+                
+            }
+
+            rows.forEach(row => {
+                const input = row.querySelector('.count-input');
+                input.addEventListener('input', recalculateDenominations);
+            });
+
+            // 🔷 Expenses
+            function recalculateExpenses() {
+                let total = 0;
+                const expenseAmounts = expenseRowsContainer.querySelectorAll('.expense-amount');
+                expenseAmounts.forEach(input => {
+                    const val = parseFloat(input.value) || 0;
+                    total += val;
+                });
+                expenseTotalElem.textContent = total.toFixed(2);
+                return total
+            }
+
+
+            // Denomination total
+            function getDenominationTotal() {
+                let total = 0;
+                const totals = document.querySelectorAll('.denomination-total');
+                totals.forEach(td => {
+                    const val = parseFloat(td.textContent) || 0;
+                    total += val;
+                });
+                return total;
+            }
+
+
+            // add expense row
+            function addExpenseRow(name = '', amount = 0) {
+                const wrapper = document.createElement('div');
+                wrapper.classList.add('flex', 'space-x-4', 'mb-4', 'expense-row');
+
+                wrapper.innerHTML = `
+                    <div class="flex-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Item</label>
+                        <input type="text" class="expense-item w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Item description" value="${name}">
+                    </div>
+                    <div class="w-32">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+                        <input type="number" min="0" step="0.01" class="expense-amount w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="0.00" value="${amount}">
+                    </div>
+                    <button type="button" class="remove-expense px-2 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 text-sm transition-colors h-10 self-end">
+                        Remove
+                    </button>
+                `;
+
+                const amountInput = wrapper.querySelector('.expense-amount');
+                const removeBtn = wrapper.querySelector('.remove-expense');
+
+                amountInput.addEventListener('input', recalculateExpenses);
+
+                removeBtn.addEventListener('click', () => {
+                    wrapper.remove();
+                    recalculateExpenses();
+                });
+
+                expenseRowsContainer.appendChild(wrapper);
+
+                recalculateExpenses();
+            }
+
+            document.getElementById('add-expense').addEventListener('click', () => {
+                addExpenseRow();
+            });
+
+            expenseForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const loadCash = document.getElementById('cash-loaded')
+                const backendCash = parseFloat(loadCash.value) || 0;
+                const denomTotal = getDenominationTotal();
+                const expenseTotal = recalculateExpenses();
+
+                const combined = denomTotal + expenseTotal;
+
+                if (combined !== backendCash) {
+                    // Show modal
+                    document.getElementById('error-message').textContent =
+                        `Cash mismatch: Denominations (${denomTotal.toFixed(2)}) + Expenses (${expenseTotal.toFixed(2)}) ≠ Loaded Cash (${backendCash.toFixed(2)})`;
+                    errorModal.classList.remove('hidden');
+                } else {
+                    // Everything okay → submit form
+                     const expenses = [];
+                    document.querySelectorAll('.expense-row').forEach(row => {
+                        const item = row.querySelector('.expense-item').value.trim();
+                        const amount = parseFloat(row.querySelector('.expense-amount').value) || 0;
+                        if (item !== '' && amount > 0) {
+                            expenses.push({ item, amount });
+                        }
+                    });
+
+                    const payload = {
+                        vehicleId: document.getElementById('vehicle-select').value,
+                        expenses
+                    };
+
+                    console.log('Submitting data:', payload);
+
+                    fetch('smrd/submit-expenses', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    })
+                        .then(response => {
+                            if (!response.ok) throw new Error('Failed to submit');
+                            return response.json();
+                        })
+                        .then(result => {
+                            alert('Expenses submitted successfully!');
+                            // Optionally reset the form here
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            alert('Failed to submit expenses');
+                        });
+                }
+            });
+
+            closeModalBtn.addEventListener('click', function () {
+                errorModal.classList.add('hidden');
+            });
+
+            // 🔷 When vehicle is selected
+            vehicleSelectBtn.addEventListener('click', () => {
+                const vehicleId = document.getElementById('vehicle-select').value;
+                const loadCash = document.getElementById('cash-loaded')
+                if (!vehicleId) {
+                    alert('Please select a vehicle!');
+                    return;
+                }
+
+                fetch(`/smrd/linesale-cash?vehicle_id=${vehicleId}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Failed to fetch vehicle cash');
+                        return response.json();
+                    })
+                    .then(data => {
+                        const cash = data.cash || 0;
+                        totalCashElem.textContent = cash.toFixed(2);
+                        totalCashValue.value = cash;
+                        loadedCashTotal.value = cash;
+                        loadCash.value = cash;
+
+                        document.getElementById('denomination-section').style.display = 'block';
+                        expenseSection.style.display = 'block';
+
+                        // Reset denominations
+                        rows.forEach(row => {
+                            row.querySelector('.count-input').value = 0;
+                            row.querySelector('.denomination-total').textContent = '0.00';
+                        });
+
+                        // Reset expenses
+                        expenseRowsContainer.innerHTML = '';
+                        expenseTotalElem.textContent = '0.00';
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert('Error loading vehicle data');
+                    });
+            });
+        });
+
+    </script>
+</body>
+</html>
