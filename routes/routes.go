@@ -44,6 +44,8 @@ func GetUrl(router *gin.Engine){
 	router.GET("/lineSale-expense",middleware.AuthMiddleware(),middleware.NoCaches(),linesale.ExpensePage)
 	router.GET("/smrd/linesale-cash",middleware.AuthMiddleware(),middleware.NoCaches(),linesale.ExpensePerVehicle)
 	router.POST("/smrd/submit-expenses",middleware.AuthMiddleware(),middleware.NoCaches(),linesale.ExpenseItems)
+	router.GET("/lineSale-closing",middleware.AuthMiddleware(),middleware.NoCaches(),linesale.LineSaleClosingPage)
+	router.GET("/smrd/line-sale-closing",middleware.AuthMiddleware(),middleware.NoCaches(),linesale.LineSaleClosingDetails)
 	
 	// Vehicles
 	router.GET("/smrd/vehicles",middleware.AuthMiddleware(),middleware.AuthSuperUser(),middleware.NoCaches(),vehicles.VehiclesPage)
