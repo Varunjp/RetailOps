@@ -3,6 +3,7 @@ package helper
 import (
 	"fmt"
 	"log"
+	"os"
 	"retialops/models"
 	"retialops/utils"
 	"time"
@@ -14,7 +15,8 @@ func CreateSuperUser(Db *gorm.DB){
 	var count int64
 
 	Db.Model(&models.User{}).Where("super_user = ?",true).Count(&count)
-	passHash,errp := utils.HashPassword("pass123")
+	password := os.Getenv("ADMIN_PASSWORD")
+	passHash,errp := utils.HashPassword(password)
 	if errp != nil{
 		fmt.Println("Error in hashing admin password :",errp)
 	}

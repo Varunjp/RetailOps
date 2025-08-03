@@ -78,12 +78,48 @@
                         </a>
                     </li>
                     <li class="nav-item mb-2">
-                        <a href="#" class="flex items-center p-3 hover:bg-blue-700 rounded-r-full">
+                        <button id="counterSalesBtn" class="w-full flex items-center p-3 hover:bg-blue-700 rounded-r-full focus:outline-none">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd" />
                             </svg>
-                            <span class="nav-text ml-3">Counter Sales</span>
-                        </a>
+                            <span class="nav-text ml-3 flex-1 text-left">Counter Sales</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" id="counterSalesArrow" class="h-4 w-4 transform transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.25 4.25a.75.75 0 01-1.06 0L5.25 8.27a.75.75 0 01-.02-1.06z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        <ul id="counterSalesMenu" class="ml-8 mt-2 hidden">
+                            <li class="mb-1">
+                                <a href="/counterSale-items" class="flex items-center p-2 hover:bg-blue-700 rounded-r-full">
+                                    <span class="ml-2">Sales</span>
+                                </a>
+                            </li>
+                            <li class="mb-1">
+                                <a href="/counterSale-purchase" class="flex items-center p-2 hover:bg-blue-700 rounded-r-full">
+                                    <span class="ml-2">Purchase</span>
+                                </a>
+                            </li>
+                            <li class="mb-1">
+                                <a href="/counterSale-expense" class="flex items-center p-2 hover:bg-blue-700 rounded-r-full">
+                                    <span class="ml-2">Expense</span>
+                                </a>
+                            </li>
+                            <li class="mb-1">
+                                <a href="/counterSale-payin" class="flex items-center p-2 hover:bg-blue-700 rounded-r-full">
+                                    <span class="ml-2">Payment In</span>
+                                </a>
+                            </li>
+                            <li class="mb-1">
+                                <a href="/counterSale-payout" class="flex items-center p-2 hover:bg-blue-700 rounded-r-full">
+                                    <span class="ml-2">Payment Out</span>
+                                </a>
+                            </li>
+                            <li class="mb-1">
+                                <a href="/counterSale-closing" class="flex items-center p-2 hover:bg-blue-700 rounded-r-full">
+                                    <span class="ml-2">Counter Sales Closing</span>
+                                </a>
+                            </li>
+                            <!-- Add more tabs here -->
+                        </ul>
                     </li>
                     <li class="nav-item mb-2">
                         <button id="lineSalesBtn" class="w-full flex items-center p-3 hover:bg-blue-700 rounded-r-full focus:outline-none">
@@ -229,6 +265,13 @@
             const content = document.querySelector('.content');
             sidebar.classList.toggle('collapsed');
             content.classList.toggle('expanded');
+        });
+
+        document.getElementById('counterSalesBtn').addEventListener('click', function () {
+            const menu = document.getElementById('counterSalesMenu');
+            const arrow = document.getElementById('counterSalesArrow');
+            menu.classList.toggle('hidden');
+            arrow.classList.toggle('rotate-180');
         });
 
         document.getElementById('lineSalesBtn').addEventListener('click', function() {

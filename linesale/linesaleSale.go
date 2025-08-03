@@ -162,6 +162,7 @@ func LineSaleSubmit(c *gin.Context){
 	actual_sale,_ := strconv.ParseFloat(c.PostForm("actual_sale"),64)
 	cash,_ := strconv.ParseFloat(c.PostForm("cash"),64)
 	account,_ := strconv.ParseFloat(c.PostForm("account"),64)
+	var existSalesClose models.LineSaleClosing
 
 	var balance float64
 	if actual_sale - (cash + account) <= 0 {
@@ -184,6 +185,15 @@ func LineSaleSubmit(c *gin.Context){
 		session.Save()
 		c.Redirect(http.StatusSeeOther,"/lineSale-sales")
 		return 
+	}
+
+	today := time.Now().Format("2006-01-02")
+
+	if err := db.Db.Where("vehicle = ? AND created_at BETWEEN ? AND ? ",vehicleId,today+" 00:00:00",today+" 23:59:59").First(&existSalesClose).Error; err == nil{
+		session.Set("saleError","Sales closing already done for this vehicle today")
+		session.Save()
+		c.Redirect(http.StatusSeeOther,"/lineSale-sales")
+		return
 	}
 
 	lineClosing := models.LineSaleClosing{

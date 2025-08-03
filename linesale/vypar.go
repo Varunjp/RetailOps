@@ -63,6 +63,7 @@ func VyaparStockOut(c *gin.Context){
 func VyaparUpdate(c *gin.Context){
 	var vypReq responsemodel.VyaparUpdateRequest
 	var vypResp []responsemodel.VyaparResponse
+	var existVyp models.VyaparSale
 	var remains	bool 
 	session := sessions.Default(c)
 
@@ -75,6 +76,12 @@ func VyaparUpdate(c *gin.Context){
 	if len(vypReq.StockUpdates) == 0{
 		log.Println("not items passes")
 		c.JSON(http.StatusBadRequest,gin.H{"error":"No items provided"})
+		return 
+	}
+
+	if err := db.Db.Where("sale_id = ?",vypReq.StockUpdates[0].ItemID).First(&existVyp).Error; err == nil{
+		log.Println("Vyapar sale already exists for this item")
+		c.JSON(http.StatusConflict,gin.H{"error":"Vyapar sale already exists for this item, cannot update"})
 		return 
 	}
 

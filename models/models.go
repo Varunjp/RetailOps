@@ -52,14 +52,17 @@ type ProductDetail struct{
 
 type CounterSale struct{
 	ID 				uint			`gorm:"primaryKey;autoIncrement"`
+	EmpID			string			`gorm:"not null"`
 	ProductID		uint			`gorm:"index"`
-	ItemName 		string 		
+	ItemName 		string 	
+	Quantity		int	
 	Rate			float64
 	TotalAmount		float64
 	Cash			float64
 	Account			float64
 	Discount		float64
 	Balance			float64
+	Receipt			string
 	Created_at		time.Time
 	Product			Product 		`gorm:"constraint:ONDELETE:CASCADE;foreignKey:ProductID"`
 	Deleted_at  	gorm.DeletedAt
@@ -154,4 +157,54 @@ type Vehicle struct{
 	License 	string		`gorm:"unique"`
 	Created_at 	time.Time
 	Delete_at 	gorm.DeletedAt
+}
+
+type Purchase struct{
+	ID 			uint 		`gorm:"primaryKey;autoIncrement"`
+	EmpID		string		`gorm:"not null"`
+	ItemName 	string		`gorm:"not null"`
+	Quantity 	int 		`gorm:"not null"`
+	Rate 		float64 	`gorm:"not null"`
+	TotalAmount float64 	`gorm:"not null"`
+	Discount 	float64 	
+	Balance 	float64
+	Cash 		float64
+	Account 	float64
+	Receipt 	string
+	Created_at 	time.Time
+}
+
+type CounterSaleExpense struct{
+	ID 				uint			`gorm:"primaryKey;autoIncrement"`
+	EmpID			string			`gorm:"not null"`
+	ItemName 		string
+	Amount			float64
+	Discount		float64
+	Balance			float64
+	Cash			float64
+	Account			float64
+	Receipt			string
+	Created_at		time.Time
+}
+
+type CounterSalePayIn struct{
+	ID 				uint			`gorm:"primaryKey;autoIncrement"`
+	EmpID			string			`gorm:"not null"`
+	Reciept			string
+	Amount			float64
+	Cash			float64
+	Account			float64
+	Balance			float64
+	Created_at		time.Time
+}
+
+type CounterSalePayOut struct{
+	ID 				uint			`gorm:"primaryKey;autoIncrement"`
+	EmpID			string			`gorm:"not null"`
+	Reciept			string
+	Amount			float64
+	Cash			float64
+	Account			float64
+	Balance			float64
+	Created_at		time.Time
 }

@@ -39,7 +39,7 @@ func GetUrl(router *gin.Engine){
 	router.GET("/lineSale-vypar",middleware.AuthMiddleware(),middleware.NoCaches(),linesale.VyparPage)
 	router.GET("/smrd/vyapar-stockout",middleware.AuthMiddleware(),middleware.NoCaches(),linesale.VyaparStockOut)
 	router.POST("/smrd/linesale-vyapar",middleware.AuthMiddleware(),middleware.NoCaches(),linesale.VyaparUpdate)
-	router.GET("lineSale-sales",middleware.AuthMiddleware(),middleware.NoCaches(),middleware.CheckLineSaleClosing(),linesale.LinesaleSalesPage)
+	router.GET("/lineSale-sales",middleware.AuthMiddleware(),middleware.NoCaches(),middleware.CheckLineSaleClosing(),linesale.LinesaleSalesPage)
 	router.GET("/linesale/totalamount",middleware.AuthMiddleware(),middleware.NoCaches(),linesale.LineSaleTotal)
 	router.POST("/linesale/sales",middleware.AuthMiddleware(),middleware.NoCaches(),linesale.LineSaleSubmit)
 	router.GET("/lineSale-expense",middleware.AuthMiddleware(),middleware.NoCaches(),linesale.ExpensePage)

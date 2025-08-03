@@ -18,6 +18,7 @@ import (
 
 func LineSaleStockIn(c *gin.Context) {
 	var inventoryReq getitems.InventoryRequest
+	var existSalesClose models.LineSaleClosing
 	tokenStr, _ := c.Cookie("JWT-User")
 	empId, _, errTk := helper.DecodeJWT(tokenStr)
 	session := sessions.Default(c)
@@ -40,6 +41,14 @@ func LineSaleStockIn(c *gin.Context) {
 		return 
 	}
 
+	today := time.Now().Format("2006-01-02")
+
+	if err := db.Db.Where("vehicle = ? AND created_at BETWEEN ? AND ? ",inventoryReq.Transactions.Vehicle,today+" 00:00:00",today+" 23:59:59").First(&existSalesClose).Error; err == nil{
+		log.Println("Sales closing already done for this vehicle today")
+		c.JSON(http.StatusBadRequest,gin.H{"error":"Sales closing already done for this vehicle today"})
+		return
+	}
+	
 	for _,item := range inventoryReq.Items{
 		var product models.Product
 		db.Db.Preload("ProductDetail").Where("id = ?",item.ItemID).First(&product)

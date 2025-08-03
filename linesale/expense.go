@@ -62,6 +62,12 @@ func ExpenseItems(c *gin.Context){
 		return 
 	}
 
+	if Sale.Status{
+		log.Println("Sale already closed for today")
+		c.JSON(http.StatusBadRequest,gin.H{"error":"Sale already closed for today, cannot add expenses"})
+		return 
+	}
+
 	for _,item := range expReq.Transaction{
 
 		expItem := models.LineSaleExpenses{
@@ -87,7 +93,7 @@ func ExpenseItems(c *gin.Context){
 		return 
 	}
 
-	c.Redirect(http.StatusFound,"/lineSale-closing")
+	c.JSON(http.StatusOK,gin.H{"message":"Expense items saved successfully","status":Sale.Status})
 }
 
 
