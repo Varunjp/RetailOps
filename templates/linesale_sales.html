@@ -352,7 +352,9 @@
             arrow.classList.toggle('rotate-180');
         });
 
-        document.getElementById('vehicleSelect').addEventListener('change', function () {
+        const vehicleSelect = document.getElementById('vehicleSelect');
+        if (vehicleSelect) {
+            vehicleSelect.addEventListener('change', function () {
             const vehicleId = this.value;
             const saleAmountInput = document.getElementById('sale_amount');
             const hiddenVehicleInput = document.getElementById('vehicle_id');
@@ -366,36 +368,37 @@
             fetch(`/linesale/totalamount?vehicle_id=${vehicleId}`)
                 .then(res => res.json())
                 .then(data => {
-                    if (data.totalAmount !== undefined) {
-                        saleAmountInput.value = data.totalAmount;
-                        hiddenVehicleInput.value = vehicleId;
-                    } else {
-                        saleAmountInput.value = '';
-                        hiddenVehicleInput.value = '';
-                        alert('Could not load total amount for selected vehicle.');
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
+                if (data.totalAmount !== undefined) {
+                    saleAmountInput.value = data.totalAmount;
+                    hiddenVehicleInput.value = vehicleId;
+                } else {
                     saleAmountInput.value = '';
                     hiddenVehicleInput.value = '';
-                    alert('Error fetching total amount.');
+                    alert('Could not load total amount for selected vehicle.');
+                }
+                })
+                .catch(err => {
+                console.error(err);
+                saleAmountInput.value = '';
+                hiddenVehicleInput.value = '';
+                alert('Error fetching total amount.');
                 });
-        });
+            });
+        }
 
 
         document.getElementById('signoutBtn').addEventListener('click', function() {
-            // Add your sign-out logic here
-            
-            alert('Signing out...');
-            // window.location.href = '/logout'; // Example redirect
+            if (confirm('Are you sure you want to sign out?')) {
+            window.location.href = '/logout';
+            }
         });
 
-        document.getElementById('closeAlertBtn').addEventListener('click', function () {
+        const closeAlertBtn = document.getElementById('closeAlertBtn');
+        if (closeAlertBtn) {
+            closeAlertBtn.addEventListener('click', function () {
             document.getElementById('errorAlert').style.display = 'none';
-        });
-
-        
+            });
+        }
 
     </script>
 </body>

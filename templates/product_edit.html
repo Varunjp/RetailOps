@@ -239,10 +239,9 @@
         });
 
         document.getElementById('signoutBtn').addEventListener('click', function() {
-            // Add your sign-out logic here
-            
-            alert('Signing out...');
-            // window.location.href = '/logout'; // Example redirect
+            if (confirm('Are you sure you want to sign out?')) {
+            window.location.href = '/logout';
+            }
         });
 
     </script>

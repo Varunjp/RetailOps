@@ -545,15 +545,11 @@
                             itemName: itemSelect.options[itemSelect.selectedIndex].text,
                             rate: parseFloat(row.querySelector('.rate-input').value) || 0,
                             stockIn: parseFloat(row.querySelector('.stock-in-input').value) || 0
-                            // stockOut: parseFloat(row.querySelector('.stock-out-input').value) || 0,
-                            // saleItem: parseFloat(row.querySelector('.sale-item-input').value) || 0,
-                            // damage: parseFloat(row.querySelector('.damage-input').value) || 0
                         });
                         
                         
                     }
                 });
-                
 
                 if (isInvaild){
                     return;
@@ -637,7 +633,6 @@
         document.addEventListener('DOMContentLoaded',function(){
             const closeBtn = document.getElementById('closeAlertBtn');
             const alertBox = document.getElementById('errorAlert');
-
             if (closeBtn && alertBox){
                 alertBox.style.display = 'none';
             }
@@ -651,6 +646,12 @@
                 closeBtn.addEventListener('click', function () {
                 alertBox.style.display = 'none';
                 });
+            }
+        });
+
+        document.getElementById('signoutBtn').addEventListener('click', function() {
+            if (confirm('Are you sure you want to sign out?')) {
+            window.location.href = '/logout';
             }
         });
         
